@@ -1,0 +1,65 @@
+# ===============================
+# Python
+# ===============================
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+.eggs/
+.env/
+venv/
+.env*/
+.venv/
+
+# ===============================
+# OS / Editor
+# ===============================
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# ===============================
+# Generated Presentations
+# ===============================
+*.pptx
+!test_template.pptx
+
+# ===============================
+# Audio / Narration Outputs
+# ===============================
+tts_audio/
+*.wav
+*.mp3
+*.ogg
+
+# ===============================
+# Temporary / Intermediate Files
+# ===============================
+output.pptx
+output_with_speaker_notes.pptx
+final_with_audio.pptx
+*_summary_with_narration.pptx
+phase*.pptx
+test_*.pptx
+
+# ===============================
+# Logs
+# ===============================
+*.log
+
+# ===============================
+# Backup / Old Files
+# ===============================
+*.bak
+*.bak.*
+paper2ppt_old.py
+paper2ppt11
+
+# ===============================
+# Misc
+# ===============================
+tmp/
+temp/
+.cache/

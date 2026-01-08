@@ -1,0 +1,14 @@
+python-pptx
+Pillow
+requests
+tqdm
+transformers
+sentencepiece
+PyMuPDF
+gTTS
+accelerate
+pytest
+pytest-cov
+# optional (dev)
+black
+ruff
