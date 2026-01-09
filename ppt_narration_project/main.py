@@ -7,42 +7,47 @@ from speaker_notes_writer import add_speaker_notes
 
 
 def main(ppt_path):
-    print("Generating narration...")
+        import os
+        os.makedirs("tts_audio", exist_ok=True)
 
-    slides = extract_slides(ppt_path)
-    narrations = []
+        slides = extract_slides(ppt_path)
+        narrations = []
 
-    for slide in slides:
-        summary = generate_summary(
-            slide["slide_title"],
-            slide["original_slide_text"]
+        for slide in slides:
+            summary = generate_summary(
+                slide["slide_title"],
+                slide["original_slide_text"]
+            )
+            narration = generate_narration(
+                slide["slide_title"],
+                slide["original_slide_text"],
+                summary
+            )
+            narrations.append(narration)
+
+        output_ppt = "output_with_speaker_notes.pptx"
+        add_speaker_notes(ppt_path, narrations, output_ppt)
+
+        if not os.path.exists(output_ppt):
+            raise RuntimeError("Speaker notes PPT was not created")
+
+        generate_tts(narrations)
+
+        from ppt_audio_embedder import embed_audio
+        embed_audio(
+            input_ppt=output_ppt,
+            audio_dir="tts_audio",
+            output_ppt="final_with_audio.pptx"
         )
 
-        narration = generate_narration(
-            slide["slide_title"],
-            slide["original_slide_text"],
-            summary
-        )
+        if not os.path.exists("final_with_audio.pptx"):
+            raise RuntimeError("Final PPT with audio was not created")
+        
 
-        narrations.append(narration)
+if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        print("Usage: python main.py <input_ppt>")
+        sys.exit(1)
 
-    print("Narration text generated.")
+    main(sys.argv[1])
 
-    output_ppt = "output_with_speaker_notes.pptx"
-    print("Adding speaker notes...")
-    add_speaker_notes(ppt_path, narrations, output_ppt)
-    print(f"Saved: {output_ppt}")
-
-    print("Generating audio narration...")
-    generate_tts(narrations)
-    print("Audio files generated.")
-
-    from ppt_audio_embedder import embed_audio
-    print("Embedding audio into presentation...")
-    embed_audio(
-        input_ppt=output_ppt,
-        audio_dir="tts_audio",
-        output_ppt="final_with_audio.pptx"
-    )
-
-    print("Final presentation with narration ready.")

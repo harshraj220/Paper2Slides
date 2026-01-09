@@ -37,7 +37,14 @@ def clean_title(t: str) -> str:
     return t
 
 
-def score_image(path: str, slide_title: str) -> int:
+def score_image(path, slide_title: str) -> int:
+    # Handle dict-based images safely
+    if isinstance(path, dict):
+        path = path.get("path", "")
+
+    if not isinstance(path, (str, bytes, os.PathLike)):
+        return -100  # deprioritize invalid entries
+
     name = os.path.basename(path).lower()
     title = slide_title.lower()
     score = 0
@@ -58,7 +65,18 @@ def score_image(path: str, slide_title: str) -> int:
 
 
 def select_best_images(images: List[str], title: str, max_images: int = 1):
-    return sorted(images, key=lambda p: score_image(p, title), reverse=True)[:max_images]
+    clean_images = []
+    for img in images:
+        if isinstance(img, dict) and "path" in img:
+            clean_images.append(img["path"])
+        elif isinstance(img, (str, bytes, os.PathLike)):
+            clean_images.append(img)
+
+    return sorted(
+        clean_images,
+        key=lambda p: score_image(p, title),
+        reverse=True
+    )[:max_images]
 
 
 def should_use_images(title: str, bullets: List[str]) -> bool:
