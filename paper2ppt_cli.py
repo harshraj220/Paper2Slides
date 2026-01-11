@@ -125,6 +125,21 @@ def drop_table_garbage(bullets: List[str]) -> List[str]:
         clean.append(b)
     return clean
 
+def drop_low_information_bullets(bullets: List[str]) -> List[str]:
+    bad_starts = (
+        "this paper", "this work", "they are", "there are",
+        "it is", "false", "true", "in conclusion"
+    )
+    cleaned = []
+    for b in bullets:
+        if len(b.split()) < 5:
+            continue
+        if b.lower().startswith(bad_starts):
+            continue
+        cleaned.append(b)
+    return cleaned
+
+
 
 def inject_visual_bullet(title: str) -> List[str]:
     t = title.lower()
@@ -160,6 +175,49 @@ def plan_slides_for_section(
             "images": images[i * max_figs:(i + 1) * max_figs],
         })
     return slides
+
+def generate_slides(input_pdf: str, output_ppt: str, model="t5-base", max_bullets=6):
+    pages_text, pages_images = load_input_paper(input_pdf)
+    sections = split_into_sections(pages_text)
+    summarizer = get_summarizer(model)
+
+    slides_plan = []
+
+    for sec in sections:
+        raw_title = sec.get("raw_title") or sec.get("title") or "Section"
+        title = clean_title(raw_title)
+
+        if any(k in title.lower() for k in SKIP_SECTIONS):
+            continue
+
+        text = sec.get("text", "")[:MAX_MODEL_CHARS]
+        summarizer_use = summarizer if len(text) <= MODEL_CUTOFF_CHARS else None
+        bullets = summarize_to_bullets(text, summarizer_use, target=max_bullets)
+
+        bullets = drop_low_information_bullets(
+            drop_table_garbage(remove_dangling_refs(bullets))
+        )
+        bullets = [
+            b.rstrip(".").capitalize()
+            for b in bullets
+        ]
+
+
+        if not bullets:
+            continue
+
+        slides_plan.extend(
+            plan_slides_for_section(
+                title.title(),
+                bullets,
+                [],
+                max_bullets,
+                MAX_FIGURES_PER_SLIDE,
+            )
+        )
+
+    doc_title = pages_text[0].split("\n")[0] if pages_text else "Presentation"
+    return build_presentation(slides_plan, output_ppt, doc_title, sections)
 
 
 # ==============================
@@ -220,7 +278,15 @@ def main():
         bullets = clean
         bullets = align_bullets_with_images(bullets)
         bullets = remove_dangling_refs(bullets)
-        bullets = drop_table_garbage(bullets)
+        bullets = drop_low_information_bullets(
+            drop_table_garbage(bullets)
+        )
+        bullets = [
+            b.rstrip(".").capitalize()
+            for b in bullets
+        ]
+
+
 
         images = []
         if should_use_images(title, bullets):
@@ -257,6 +323,7 @@ def main():
     out = build_presentation(slides_plan, args.output, doc_title, sections)
     print("Saved:", out)
     print("Summarized slides created.")
+
 
 
 

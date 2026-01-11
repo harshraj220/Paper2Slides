@@ -1,4 +1,4 @@
-from ollama_client import ollama_generate
+from .ollama_client import ollama_generate
 
 def generate_summary(slide_title, original_text):
     prompt = f"""
