@@ -1,82 +1,45 @@
-def generate_narration(slide_title, original_text, summary_text):
-    """
-    Deterministic narration:
-    - 2 short sentences
-    - Slightly more explanatory than summary
-    - No hallucination
-    """
-    import re
+from models.qwen_llm import qwen_generate
 
-    # Normalize text
-    text = original_text.replace("\n", " ").strip()
-
-    # Normalize ALL unicode spaces to normal space
-    text = re.sub(r"[\u00A0\u2000-\u200B]", " ", text)
+__all__ = ["generate_narration"]
 
 
-    # Remove section numbers
-    text = re.sub(r"\b\d+\.\d+\b", "", text)
+def generate_narration(title: str, slide_text: str, summary: str) -> str:
+    prompt = f"""
+You are presenting your own research to a live audience.
 
-    # Remove known headers
-    text = re.sub(r"\bHardware and Schedule\b", "", text, flags=re.IGNORECASE)
+Slide title:
+{title}
 
-    # Remove incomplete comparison phrases
-    text = re.sub(r"\binstead of\b.*", "", text, flags=re.IGNORECASE)
+The slide already shows technical bullet points.
+Do NOT explain or restate them.
 
-    # Fix dropout formatting
-    text = re.sub(r"Pdrop\s*=\s*0\s*\.", "Pdrop = 0.1", text)
-    text = re.sub(r"Pdrop\s*=\s*(?:,|\.)", "Pdrop = 0.1", text)
-    text = re.sub(r"Pdrop\s*=\s*", "Pdrop = ", text)
+Your narration should:
+- Sound like spoken commentary, not a paper
+- Focus on intuition or high-level takeaway
+- Be concise and conversational
+- Be concise and conversational
+- Use AT MOST 2 sentences
 
-    # Insert missing sentence boundaries
-    text = re.sub(r"architectures Recurrent", "architectures. Recurrent", text)
-    text = re.sub(r"(sequence length)\s+(We trained)", r"\1. \2", text, flags=re.IGNORECASE)
+Slide bullets (context only, do not repeat):
+{slide_text}
+""".strip()
 
-    # Normalize whitespace
-    text = re.sub(r"\s+", " ", text).strip()
+    text = qwen_generate(prompt, max_tokens=80).strip()
 
-    # Fix spaced decimals like "0. 1" (including unicode spaces)
-    text = re.sub(r"(\d)\.\s*(\d)", r"\1.\2", text)
+    # Remove chat fillers
+    for prefix in ["Sure", "Okay", "Alright", "Here’s", "Here's"]:
+        if text.startswith(prefix):
+            text = text[len(prefix):].lstrip()
 
+    # If model slips into method description, force intuition framing
+    # (Optional) Check for very generic failures, but do not replace with hardcoded paper text.
+    if len(text) < 10:
+        text = "This slide outlines the key points shown here."
 
-    # Ensure final punctuation
-    text = re.sub(r"([a-zA-Z])$", r"\1.", text)
-    
-    # FINAL semantic fix for PPT run-split numbers like "Pdrop = 0 . 1"
-    text = re.sub(r"Pdrop\s*=\s*0\s*\.\s*1", "Pdrop = 0.1", text)
+    # Enforce max 2 sentences
+    sentences = [s.strip() for s in text.split(".") if s.strip()]
+    text = ". ".join(sentences[:2])
+    if not text.endswith("."):
+        text += "."
 
-
-    # Split into sentences
-    parts = [p.strip() for p in text.split(".") if p.strip()]
-    if not parts:
-        return ""
-
-    sentence1 = parts[0]
-
-    if len(parts) > 1:
-        sentence2 = parts[1]
-    else:
-        lower = text.lower()
-        if "attention" in lower:
-            sentence2 = "This allows the model to focus on relevant information during processing."
-        elif "batch" in lower or "sequence length" in lower:
-            sentence2 = "This helps improve training efficiency."
-        elif "gpu" in lower or "hardware" in lower:
-            sentence2 = "This setup supports large-scale model training."
-        elif "dropout" in lower:
-            sentence2 = "This parameter setting influences model generalization during training."
-        elif "distant" in lower or "dependencies" in lower:
-            sentence2 = "This makes it harder to capture long-range relationships."
-        else:
-            sentence2 = "This affects how information is processed within the model."
-
-    if not sentence2.endswith("."):
-        sentence2 += "."
-
-    narration = f"{sentence1}. {sentence2}"
-
-    # FINAL hard fix for PPT run-split decimals (guaranteed)
-    narration = narration.replace("Pdrop = 0. 1", "Pdrop = 0.1")
-
-    return narration
-
+    return text

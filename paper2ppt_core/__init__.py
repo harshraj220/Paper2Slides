@@ -8,6 +8,6 @@ Modules:
 """
 from .io import read_pdf_pages
 from .sections import split_into_sections
-from .summarize import heuristic_bullets
+from .summarize import summarize_to_bullets, get_summarizer
 from .tts import synthesize
 __all__ = ["read_pdf_pages", "split_into_sections", "heuristic_bullets", "synthesize"]

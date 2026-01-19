@@ -1,39 +1,21 @@
-from .ollama_client import ollama_generate
+from models.qwen_llm import qwen_generate
 
-def generate_summary(slide_title, original_text):
+
+def generate_summary(title: str, slide_text: str) -> str:
     prompt = f"""
-Generate a presentation slide summary.
+Summarize the following slide content for internal narration context.
 
-STRICT RULES:
-- Use ONLY exact facts stated in the slide content
-- Do NOT comment on missing information
-- Do NOT infer or explain
-- Use at most 3 bullets
-- Each bullet must be one short factual sentence
-- Use hyphen bullets only ("- ")
+Rules:
+- concise
+- factual
+- no repetition
+- no introduction phrases
+- max 3 sentences
 
-Slide Content:
-{original_text}
+TITLE:
+{title}
 
-Write ONLY the bullet points.
+CONTENT:
+{slide_text}
 """
-
-    raw = ollama_generate(prompt)
-
-    bullets = []
-    for line in raw.splitlines():
-        line = line.strip()
-        if not line:
-            continue
-        if line.startswith(("-", "•")):
-            clean = line.lstrip("-• ").strip()
-            bullets.append(f"- {clean}")
-        if len(bullets) == 3:
-            break
-
-    # Fallback if model returns nothing
-    if not bullets and original_text.strip():
-        first_sentence = original_text.strip().split(".")[0]
-        bullets.append(f"- {first_sentence.strip()}.")
-
-    return "\n".join(bullets)
+    return qwen_generate(prompt, max_tokens=120)

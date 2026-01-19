@@ -22,53 +22,79 @@ def clean_academic_noise(text: str) -> str:
     return t
 
 def is_heading_line(line: str) -> bool:
-    if not line: return False
+    if not line:
+        return False
     l = line.strip()
-    if len(l) > 120: return False
+
+    # hard length guard
+    if not (3 <= len(l) <= 80):
+        return False
+
+    # strict academic headings
     for pat in HEADING_PATTERNS:
         if re.match(pat, l, flags=re.IGNORECASE):
             return True
-    if re.match(r"^\s*\d+(\.\d+)*\s+[A-Za-z].{0,90}$", l):
+
+    # numbered section headers ONLY (not captions)
+    if re.match(r"^\s*\d+(\.\d+)*\s+[A-Z][A-Za-z\s]{2,60}$", l):
         return True
+
     return False
 
 def normalize_heading(h: str) -> str:
     s = (h or "").lower()
     s = re.sub(r"[^a-z0-9 ]", " ", s)
     s = re.sub(r"\s+", " ", s).strip()
+
     if "abstract" in s: return "abstract"
     if "introduction" in s: return "introduction"
     if "background" in s: return "background"
     if "related work" in s: return "related work"
-    if "method" in s or "approach" in s: return "method"
+    if "method" in s or "approach" in s or "model" in s: return "method"
     if "experiment" in s or "dataset" in s: return "experiments"
     if "result" in s or "analysis" in s: return "results"
-    if "conclusion" in s: return "conclusion"
-    return s or "section"
+    if "conclusion" in s or "limitation" in s: return "conclusion"
+
+    return "section"
 
 def split_into_sections(pages_text: List[str]) -> List[Dict]:
     sections = []
     current = None
+
     for i, ptxt in enumerate(pages_text):
-        lines = [ln.strip() for ln in (ptxt or "").splitlines()]
+        lines = [ln.strip() for ln in (ptxt or "").splitlines() if ln.strip()]
+
         for ln in lines:
             if is_heading_line(ln):
-                if current and current.get("text", "").strip():
+                if current and current["text"].strip():
                     sections.append(current)
-                current = {"title": normalize_heading(ln), "raw_title": ln.strip(), "text": "", "pages": set([i]), "first_page": i}
+
+                current = {
+                    "title": normalize_heading(ln),
+                    "raw_title": ln.strip(),
+                    "text": "",
+                    "pages": {i},
+                    "first_page": i,
+                }
             else:
                 if current is None:
-                    current = {"title":"title","raw_title":"Title","text":"", "pages": set([i]), "first_page": i}
-                current["text"] += (("\n" if current["text"] else "") + ln)
+                    # skip junk before first real section
+                    continue
+                current["text"] += (" " + ln)
                 current["pages"].add(i)
-    if current and current.get("text","").strip():
+
+    if current and current["text"].strip():
         sections.append(current)
-    # clean and merge small sections
-    clean_secs = []
+
+    # cleanup pass
+    cleaned = []
     for sec in sections:
-        sec_text = clean_academic_noise(sec["text"])
-        if len(sec_text) < 30 and sec["title"] not in ("title", "abstract"):
+        sec["text"] = clean_academic_noise(sec["text"])
+
+        # allow short but meaningful sections
+        if len(sec["text"]) < 50 and sec["title"] not in ("abstract", "conclusion"):
             continue
-        sec["text"] = sec_text
-        clean_secs.append(sec)
-    return clean_secs
+
+        cleaned.append(sec)
+
+    return cleaned

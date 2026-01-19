@@ -7,7 +7,7 @@ from typing import List, Dict
 from datetime import datetime
 from PIL import Image, ImageOps, ImageChops
 from io import BytesIO
-import json, os
+import os
 
 # =========================
 # THEME & CONSTANTS
@@ -16,216 +16,285 @@ import json, os
 DEFAULT_THEME = {
     "title_font": "Calibri",
     "body_font": "Calibri",
-    "title_size_pt": 36,
-    "body_size_pt": 18,
+    "title_size_pt": 32,
+    "body_size_pt": 16,
     "accent_color": [18, 90, 173],
     "background_color": [255, 255, 255],
-    "panel_bg": [20, 20, 20],
-    "text_color": [245, 245, 245],
-    "subtext_color": [200, 200, 200],
-    "panel_transparency": 0.30,
-    "image_frame": "none"
+    "panel_bg": [255, 255, 255],
+    "text_color": [0, 0, 0],
+    "subtext_color": [90, 90, 90],
+    "panel_transparency": 0.0,
 }
 
-THEME_DIR = Path(__file__).resolve().parent.parent / "paper2ppt" / "themes"
-if not THEME_DIR.exists():
-    THEME_DIR = Path(__file__).resolve().parent / "themes"
-
 MAX_FIGURES_PER_SLIDE = 2
-MAX_VISIBLE_BULLETS = 5
+MAX_VISIBLE_BULLETS = 4
+MAX_BULLET_CHARS = 140
 
 # =========================
 # UTILS
 # =========================
 
-def load_theme(theme_name: str):
-    try:
-        if not theme_name:
-            return DEFAULT_THEME
-        path = Path(theme_name)
-        if path.exists():
-            return {**DEFAULT_THEME, **json.loads(path.read_text())}
-        tfile = THEME_DIR / f"{theme_name}.json"
-        if tfile.exists():
-            return {**DEFAULT_THEME, **json.loads(tfile.read_text())}
-    except Exception:
-        pass
-    return DEFAULT_THEME
+def rgb(c):
+    return RGBColor(int(c[0]), int(c[1]), int(c[2]))
 
 
-def rgb(t):
-    return RGBColor(int(t[0]), int(t[1]), int(t[2]))
-
-
-def _draw_footer(slide, prs, theme, text=None):
-    try:
-        footer = slide.shapes.add_textbox(
-            Inches(0.4),
-            prs.slide_height - Inches(0.5),
-            prs.slide_width - Inches(0.8),
-            Inches(0.4),
-        )
-        tf = footer.text_frame
-        tf.clear()
-        p = tf.paragraphs[0]
-        p.text = text or f"Auto-generated • {datetime.utcnow().strftime('%Y-%m-%d %H:%M UTC')}"
-        p.font.size = Pt(9)
-        p.font.color.rgb = rgb(theme["subtext_color"])
-        p.alignment = PP_ALIGN.CENTER
-    except Exception:
-        pass
+def _draw_footer(slide, prs, theme):
+    footer = slide.shapes.add_textbox(
+        Inches(0.6),
+        prs.slide_height - Inches(0.45),
+        prs.slide_width - Inches(1.2),
+        Inches(0.3),
+    )
+    tf = footer.text_frame
+    tf.clear()
+    p = tf.paragraphs[0]
+    p.text = f"Auto-generated • {datetime.utcnow().strftime('%Y-%m-%d')}"
+    p.font.size = Pt(9)
+    p.font.color.rgb = rgb(theme["subtext_color"])
+    p.alignment = PP_ALIGN.CENTER
 
 
 # =========================
 # IMAGE HELPERS
 # =========================
 
+from PIL import Image, ImageChops, ImageFile
+from io import BytesIO
+import os
+
+ImageFile.LOAD_TRUNCATED_IMAGES = True  # ✅ CRITICAL
+
 def crop_image_whitespace(path: str) -> BytesIO:
+    """
+    Robust image loader.
+    - Handles truncated PNGs
+    - Falls back gracefully
+    - Never crashes slide generation
+    """
     try:
-        img = Image.open(path).convert("RGB")
+        if not os.path.exists(path) or os.path.getsize(path) < 1024:
+            raise OSError("Image missing or too small")
+
+        img = Image.open(path)
+        img.load()
+        img = img.convert("RGB")
+
         bg = Image.new(img.mode, img.size, img.getpixel((0, 0)))
         diff = ImageChops.difference(img, bg)
         bbox = diff.getbbox()
-        cropped = img.crop(bbox) if bbox else img
-        bio = BytesIO()
-        cropped.save(bio, format="PNG")
-        bio.seek(0)
-        return bio
-    except Exception:
-        bio = BytesIO()
-        Image.open(path).convert("RGB").save(bio, format="PNG")
-        bio.seek(0)
-        return bio
 
+        if bbox:
+            img = img.crop(bbox)
 
-def thumb_fit_bytesio(bio, target_w_px: int, target_h_px: int) -> BytesIO:
+    except Exception as e:
+        print(f"[WARN] Skipping corrupted image: {path} ({e})")
+        img = Image.new("RGB", (800, 600), (255, 255, 255))
+
+    bio = BytesIO()
+    img.save(bio, format="PNG")
     bio.seek(0)
-    img = Image.open(bio).convert("RGB")
-    img = ImageOps.contain(img, (target_w_px, target_h_px))
-    out = BytesIO()
-    img.save(out, format="PNG")
-    out.seek(0)
-    return out
+    return bio
+
+
+
+def fit_image(bio, w_px, h_px) -> BytesIO:
+    """Resize image to fit within dimensions while maintaining aspect ratio"""
+    try:
+        bio.seek(0)
+        img = Image.open(bio)
+        
+        # Use PIL's contain to maintain aspect ratio
+        img = ImageOps.contain(img, (w_px, h_px))
+        
+        out = BytesIO()
+        img.save(out, format="PNG")
+        out.seek(0)
+        return out
+        
+    except Exception as e:
+        print(f"[WARN] Failed to resize image: {e}")
+        bio.seek(0)
+        return bio
 
 
 # =========================
 # SLIDE BUILDERS
 # =========================
 
-def add_text_panel(slide, prs, theme, full_width: bool):
-    left, top = Inches(0.6), Inches(1.0)
-    width = prs.slide_width - (Inches(1.2) if full_width else Inches(4.0))
-    height = prs.slide_height - Inches(2.2)
-    tb = slide.shapes.add_textbox(left, top, width, height)
+def add_title(slide, prs, text, theme):
+    """Add title to slide"""
+    box = slide.shapes.add_textbox(
+        Inches(0.6), Inches(0.4),
+        prs.slide_width - Inches(1.2), Inches(0.9)
+    )
+    tf = box.text_frame
+    tf.clear()
+    p = tf.paragraphs[0]
+    p.text = text[:120]
+    p.font.size = Pt(theme["title_size_pt"])
+    p.font.bold = True
+    p.font.color.rgb = rgb(theme["text_color"])
+    p.alignment = PP_ALIGN.LEFT
 
-    try:
-        fill = tb.fill
-        fill.solid()
-        fill.fore_color.rgb = rgb(theme["panel_bg"])
-        fill.fore_color.transparency = float(theme.get("panel_transparency", 0.25))
-    except Exception:
-        pass
 
-    return tb
+def add_bullets(slide, prs, bullets, has_images, theme):
+    """Add bullet points to slide with proper spacing"""
+    left = Inches(0.6)
+    top = Inches(1.5)
+    
+    # Adjust width based on whether we have images
+    if has_images:
+        width = prs.slide_width - Inches(4.6)  # Leave space for images
+    else:
+        width = prs.slide_width - Inches(1.2)
+    
+    height = prs.slide_height - Inches(2.0)
+
+    box = slide.shapes.add_textbox(left, top, width, height)
+    tf = box.text_frame
+    tf.clear()
+    tf.word_wrap = True
+    tf.auto_size = MSO_AUTO_SIZE.TEXT_TO_FIT_SHAPE
+
+    for i, b in enumerate(bullets[:MAX_VISIBLE_BULLETS]):
+        if not b:
+            continue
+
+        # Safety truncation
+        if len(b) > MAX_BULLET_CHARS:
+            b = b[:MAX_BULLET_CHARS - 1] + "…"
+
+        p = tf.add_paragraph() if i > 0 else tf.paragraphs[0]
+        p.text = b
+        p.level = 0
+        p.font.size = Pt(theme["body_size_pt"])
+        p.font.color.rgb = rgb(theme["text_color"])
+        p.space_after = Pt(12)
 
 
-def add_images_right(slide, prs, image_items: List[Dict], theme):
-    if not image_items:
+def add_images(slide, prs, images, theme):
+    """Add images to the right side of slide"""
+    if not images:
         return
+    
+    # Image column dimensions
+    col_w = Inches(3.6)
+    col_h = Inches(2.6)
+    gap = Inches(0.4)
+    left = prs.slide_width - col_w - Inches(0.5)
+    top = Inches(1.4)
 
-    col_w, col_h = Inches(3.2), Inches(2.6)
-    gap = Inches(0.28)
-    left = prs.slide_width - col_w - Inches(0.6)
-    top = Inches(1.2)
-
+    # Convert to pixels for PIL
     px_w = int(col_w.inches * 96)
     px_h = int(col_h.inches * 96)
 
-    for idx, item in enumerate(image_items[:MAX_FIGURES_PER_SLIDE]):
+    added_count = 0
+    for i, img in enumerate(images[:MAX_FIGURES_PER_SLIDE]):
         try:
-            pth = item["path"] if isinstance(item, dict) else str(item)
-            caption = item.get("caption", "") if isinstance(item, dict) else ""
-            bio = thumb_fit_bytesio(crop_image_whitespace(pth), px_w, px_h)
-            slide.shapes.add_picture(
-                bio, left, top + idx * (col_h + gap), col_w, col_h
+            img_path = img.get("path", "")
+            
+            # Verify file exists
+            if not os.path.exists(img_path):
+                print(f"[ERROR] Image not found: {img_path}")
+                continue
+            
+            print(f"[IMAGE] Adding to slide: {os.path.basename(img_path)}")
+            
+            # Process image
+            bio = crop_image_whitespace(img_path)
+            bio = fit_image(bio, px_w, px_h)
+            
+            # Calculate position for multiple images
+            img_top = top + i * (col_h + gap)
+            
+            # Add image to slide
+            pic = slide.shapes.add_picture(
+                bio, left, img_top, col_w, col_h
             )
-            if caption:
+            
+            added_count += 1
+            
+            # Add caption if available
+            caption_text = img.get("caption", "").strip()
+            if caption_text:
                 cap = slide.shapes.add_textbox(
-                    left, top + idx * (col_h + gap) + col_h + Inches(0.04),
-                    col_w, Inches(0.6)
+                    left,
+                    img_top + col_h + Inches(0.05),
+                    col_w,
+                    Inches(0.35),
                 )
-                ctf = cap.text_frame
-                ctf.clear()
-                cp = ctf.paragraphs[0]
-                cp.text = caption[:220]
-                cp.font.size = Pt(10)
-                cp.font.italic = True
-                cp.font.color.rgb = rgb(theme["subtext_color"])
-                cp.alignment = PP_ALIGN.CENTER
-        except Exception:
+                tf = cap.text_frame
+                tf.clear()
+                tf.word_wrap = True
+                p = tf.paragraphs[0]
+                p.text = caption_text[:180]
+                p.font.size = Pt(10)
+                p.font.italic = True
+                p.font.color.rgb = rgb(theme["subtext_color"])
+                p.alignment = PP_ALIGN.CENTER
+                
+        except Exception as e:
+            print(f"[ERROR] Failed to add image {img.get('path', 'unknown')}: {e}")
+            import traceback
+            traceback.print_exc()
             continue
+    
+    if added_count > 0:
+        print(f"[SUCCESS] Added {added_count} images to slide")
+    else:
+        print(f"[WARN] No images were successfully added to slide")
 
 
 # =========================
 # MAIN BUILDER
 # =========================
 
-def build_presentation(slides_plan, output_path: str, doc_title: str, sections, theme_name="academic"):
-    theme = load_theme(theme_name)
+def build_presentation(slides_plan, output_path, doc_title, sections, theme_name=None):
+    """
+    Build PowerPoint presentation from slides plan.
+    
+    Args:
+        slides_plan: List of slide dicts with keys: title, bullets, images
+        output_path: Path to save PPTX
+        doc_title: Document title for first slide
+        sections: Original sections (for reference)
+        theme_name: Optional theme name
+    """
+    theme = DEFAULT_THEME
     prs = Presentation()
-    blank = prs.slide_layouts[6]
+    blank = prs.slide_layouts[6]  # Blank layout
 
-    for s in slides_plan:
+    print(f"\n[PPTX] Building presentation with {len(slides_plan)} slides...")
+
+    for idx, s in enumerate(slides_plan):
         slide = prs.slides.add_slide(blank)
-        has_images = bool(s.get("images"))
+        
+        # Force solid white background
+        bg = slide.background
+        bg.fill.solid()
+        bg.fill.fore_color.rgb = RGBColor(255, 255, 255)
 
-        panel = add_text_panel(slide, prs, theme, full_width=not has_images)
-        tf = panel.text_frame
-        tf.clear()
-        tf.word_wrap = True
-        tf.auto_size = MSO_AUTO_SIZE.TEXT_TO_FIT_SHAPE
-
-        # Title
-        title = tf.paragraphs[0]
-        title.text = s.get("title", "")[:120]
-        title.font.bold = True
-        title.font.size = Pt(theme["title_size_pt"])
-        title.font.color.rgb = rgb(theme["text_color"])
-        title.space_after = Pt(10)
-
-        # Key Insight
-        if s.get("insight"):
-            pi = tf.add_paragraph()
-            pi.text = "Key insight: " + s["insight"]
-            pi.font.italic = True
-            pi.font.size = Pt(12)
-            pi.font.color.rgb = rgb(theme["subtext_color"])
-            pi.space_after = Pt(8)
-
-        # Bullets
-        for b in s.get("bullets", [])[:MAX_VISIBLE_BULLETS]:
-            if not b:
-                continue
-            pb = tf.add_paragraph()
-            pb.text = "• " + b
-            pb.level = 1
-            pb.font.size = Pt(theme["body_size_pt"])
-            pb.font.color.rgb = rgb(theme["text_color"])
-            pb.space_before = Pt(2)
-            pb.space_after = Pt(6)
-
-        if has_images:
-            add_images_right(slide, prs, s["images"], theme)
-
-        try:
-            notes = slide.notes_slide.notes_text_frame
-            notes.clear()
-            if s.get("tldr"):
-                notes.text = "TL;DR: " + s["tldr"]
-        except Exception:
-            pass
-
+        # Get slide content
+        title = s.get("title", "")
+        bullets = s.get("bullets", [])
+        images = s.get("images", [])
+        
+        print(f"\n[SLIDE {idx+1}] Title: '{title}'")
+        print(f"  Bullets: {len(bullets)}")
+        print(f"  Images: {len(images)}")
+        
+        # Add content
+        add_title(slide, prs, title, theme)
+        add_bullets(slide, prs, bullets, bool(images), theme)
+        
+        if images:
+            print(f"  Processing {len(images)} images...")
+            add_images(slide, prs, images, theme)
+        
         _draw_footer(slide, prs, theme)
 
+    # Save presentation
     prs.save(output_path)
+    print(f"\n[SUCCESS] Presentation saved: {output_path}")
+    
     return output_path

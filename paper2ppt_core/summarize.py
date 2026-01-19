@@ -1,57 +1,64 @@
 import re
-import math
 from typing import List, Optional
-from collections import Counter
 
-def heuristic_bullets(text: str, target: int = 5):
-    """
-    Backward-compatible wrapper.
-    Uses extractive fallback logic only.
-    """
+# ============================
+# LIGHT HEURISTIC EXTRACTION
+# ============================
+
+CLAIM_PATTERNS = [
+    r"\bwe (propose|present|introduce|develop)\b",
+    r"\bour (method|approach|model)\b",
+    r"\bresults (show|demonstrate|indicate)\b",
+    r"\boutperform(s|ed)?\b",
+    r"\bachieve(s|d)?\b",
+    r"\bimprove(s|d)?\b",
+]
+
+def extract_claim_sentences(text: str, max_items: int = 8) -> List[str]:
     if not text:
         return []
 
-    sents = re.split(r"(?<=[.!?])\s+", text)
-    sents = [s.strip() for s in sents if len(s.split()) >= 6]
-    return sents[:target]
+    sentences = re.split(r"(?<=[.!?])\s+", text)
+    selected = []
 
+    for s in sentences:
+        s = s.strip()
+        if not (10 <= len(s.split()) <= 40):
+            continue
+
+        low = s.lower()
+        if any(re.search(p, low) for p in CLAIM_PATTERNS):
+            selected.append(s)
+
+        if len(selected) >= max_items:
+            break
+
+    return selected
 
 
 # ============================
 # MODEL LOADER
 # ============================
+
 def get_summarizer(model_name: Optional[str]):
     try:
         from transformers import pipeline
-        if not model_name or model_name.lower() in ("none", "no", "off"):
+        if not model_name or model_name.lower() in ("none", "off"):
             return None
-        return pipeline("text2text-generation", model=model_name, truncation=True)
+        return pipeline(
+            "text2text-generation",
+            model=model_name,
+            truncation=True,
+            device_map="auto",
+        )
     except Exception:
         return None
 
 
 # ============================
-# EXTRACTIVE SCORING
-# ============================
-def _score_sentences(text: str):
-    sents = re.split(r"(?<=[.!?])\s+", text)
-    words = re.findall(r"\w+", text.lower())
-    freqs = Counter(words)
-
-    scores = []
-    for s in sents:
-        w = re.findall(r"\w+", s.lower())
-        if not w:
-            scores.append((s, 0.0))
-            continue
-        score = sum(freqs.get(t, 0) for t in w) / math.sqrt(len(w))
-        scores.append((s, score))
-    return scores
-
-
-# ============================
 # MAIN SUMMARIZER
 # ============================
+
 def summarize_to_bullets(
     text: str,
     summarizer_callable,
@@ -61,96 +68,72 @@ def summarize_to_bullets(
         return []
 
     # ----------------------------
-    # 1. Extractive fallback
+    # 1. Extract claim candidates
     # ----------------------------
-    scored = _score_sentences(text)
-    top = sorted(scored, key=lambda x: -x[1])[: max(3, target * 2)]
-    chosen = [s for s, _ in top]
+    candidates = extract_claim_sentences(text, max_items=target * 2)
 
-    all_sents = re.split(r"(?<=[.!?])\s+", text)
-    extractive = [s.strip() for s in all_sents if s in chosen][:target]
+    if not candidates:
+        # fallback: first reasonable sentences
+        sents = re.split(r"(?<=[.!?])\s+", text)
+        candidates = [s for s in sents if len(s.split()) >= 8][:target]
+
+    bullets = []
 
     # ----------------------------
-    # 2. Model path (if enabled)
+    # 2. Rewrite each bullet using LLM
     # ----------------------------
     if summarizer_callable:
-        prompt = f"""
-Create presentation slide bullets.
+        for s in candidates:
+            prompt = f"""
+Rewrite the following sentence into ONE presentation slide bullet.
 
 Rules:
-- EXACTLY {target} bullets
-- 6–12 words each
-- Slide-style (noun phrases preferred)
-- No authors, citations, permissions
-- No repetition
-- One bullet per line
-- No numbering or symbols
+- Preserve technical meaning
+- Concise but complete
+- 10–18 words
+- No authors, citations, or narration
+- No punctuation at end
 
-Text:
-{text}
+Sentence:
+{s}
 """
-        try:
-            out = summarizer_callable(prompt, max_new_tokens=180, truncation=True)
-            gen = out[0].get("generated_text") or out[0].get("text") or ""
-            parts = [p.strip(" •-\t") for p in gen.split("\n") if p.strip()]
+            try:
+                out = summarizer_callable(prompt, max_new_tokens=60)
+                gen = out[0].get("generated_text") or out[0].get("text") or ""
+                bullet = gen.strip().split("\n")[0].strip("•- ").rstrip(".")
+                if bullet:
+                    bullets.append(bullet)
+            except Exception:
+                bullets.append(s)
 
-            if parts:
-                seen, final = set(), []
-                for p in parts:
-                    key = re.sub(r"[^a-z0-9 ]", "", p.lower())[:80]
-                    if key not in seen:
-                        seen.add(key)
-                        final.append(p.rstrip("."))
-                return final[:target]
-        except Exception:
-            pass  # fallback safely
+            if len(bullets) >= target:
+                break
+
+    else:
+        bullets = candidates[:target]
 
     # ----------------------------
-    # 3. Final cleaning + slide normalization
+    # 3. Final cleanup
     # ----------------------------
-    BOILERPLATE = [
-        "this paper",
-        "we present",
-        "we propose",
-        "we show",
-        "shows",
-        "copyright",
-        "email",
-        "university",
-        "google hereby",
-    ]
+    final = []
+    seen = set()
 
-    def de_academic(b: str) -> str:
+    for b in bullets:
         b = re.sub(
-            r"^(shows|we show|we propose|this paper|our model shows)\s+",
+            r"^(this paper|we propose|we present|our method shows)\s+",
             "",
             b,
             flags=re.I,
         )
-        return b
-
-    cleaned = []
-    seen = set()
-
-    for b in extractive:
-        b = b.strip().rstrip(".")
-        low = b.lower()
-
-        if any(p in low for p in BOILERPLATE):
+        b = b.strip()
+        if not (6 <= len(b.split()) <= 20):
             continue
 
-        b = de_academic(b)
-        b = re.sub(r"^\s+", "", b)
-
-        words = b.split()
-        if not (4 <= len(words) <= 16):
-            continue
-
-        key = re.sub(r"[^a-z0-9 ]", "", low)[:80]
+        key = re.sub(r"[^a-z0-9 ]", "", b.lower())[:80]
         if key in seen:
             continue
         seen.add(key)
 
-        cleaned.append(b[0].upper() + b[1:])
+        final.append(b[0].upper() + b[1:])
 
-    return cleaned[:target]
+    return final[:target]

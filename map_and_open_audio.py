@@ -7,7 +7,7 @@ auddir = Path("paper2ppt_audio")
 prs = Presentation(ppt)
 mapping = []
 for i, slide in enumerate(prs.slides, start=1):
-    audio = auddir / f"slide_{i}.mp3"
+    audio = next(auddir.glob(f"slide_{i}.*"), None)
     if audio.exists():
         mapping.append((i, str(audio)))
     else:
@@ -23,8 +23,9 @@ for s,a in mapping:
     print(f"Slide {s:02d} -> {a if a else 'NO AUDIO'}")
 
 # optionally open audio files (macOS)
+AUTO_OPEN = False
 for s,a in mapping:
-    if a:
+    if AUTO_OPEN and a:
         print("Opening", a)
         if sys.platform == "darwin":
             subprocess.Popen(["open", a])
@@ -32,3 +33,4 @@ for s,a in mapping:
             subprocess.Popen(["xdg-open", a])
         elif sys.platform.startswith("win"):
             os.startfile(a)
+      

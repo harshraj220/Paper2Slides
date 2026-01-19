@@ -2,7 +2,7 @@ import os
 import sys
 
 from paper2ppt_cli import generate_slides
-from ppt_narration_project.main import generate_narration
+from ppt_narration_project.main import generate_narrated_ppt
 
 
 def main():
@@ -16,18 +16,25 @@ def main():
     slides_ppt = "output.pptx"
     final_ppt = f"{base}_summary_with_narration.pptx"
 
-    print("Generating summarized slides...")
-    generate_slides(input_pdf, slides_ppt)
+    print("[paper2ppt] Generating summarized slides...")
+    generate_slides(
+        input_pdf=input_pdf,
+        output_ppt=slides_ppt,
+        max_bullets=5
+    )
 
-    print("Adding narration (hidden)...")
-    final_generated = generate_narration(slides_ppt)
+    if not os.path.exists(slides_ppt):
+        raise RuntimeError("Slide generation failed")
 
-    if not os.path.exists(final_generated):
-        raise RuntimeError("Final narrated PPT not found")
+    print("[paper2ppt] Adding narration (hidden)...")
+    narrated = generate_narrated_ppt(slides_ppt)
 
-    os.replace(final_generated, final_ppt)
+    if not os.path.exists(narrated):
+        raise RuntimeError("Narration generation failed")
 
-    print(f"Final output ready: {final_ppt}")
+    os.replace(narrated, final_ppt)
+
+    print(f"[paper2ppt] ✅ Final output ready: {final_ppt}")
 
 
 if __name__ == "__main__":
