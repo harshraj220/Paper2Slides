@@ -90,7 +90,7 @@ Rewrite the following sentence into ONE presentation slide bullet.
 Rules:
 - Preserve technical meaning
 - Concise but complete
-- 10–18 words
+- 25–50 words
 - No authors, citations, or narration
 - No punctuation at end
 
@@ -98,7 +98,7 @@ Sentence:
 {s}
 """
             try:
-                out = summarizer_callable(prompt, max_new_tokens=60)
+                out = summarizer_callable(prompt, max_new_tokens=150)
                 gen = out[0].get("generated_text") or out[0].get("text") or ""
                 bullet = gen.strip().split("\n")[0].strip("•- ").rstrip(".")
                 if bullet:
@@ -126,7 +126,7 @@ Sentence:
             flags=re.I,
         )
         b = b.strip()
-        if not (6 <= len(b.split()) <= 20):
+        if not (6 <= len(b.split()) <= 60):
             continue
 
         key = re.sub(r"[^a-z0-9 ]", "", b.lower())[:80]
