@@ -100,27 +100,33 @@ python3 paper2slides.py aiawn.pdf
 
 ---
 
-## Project Structure (Key Files)
+## Project Structure
+
+The project is organized efficiently to separate listing, generation, and narration concerns:
 
 ```
 paper2slides/
-├── paper2slides.py              # Orchestrates the full pipeline
-├── paper2ppt_cli.py             # Slide generation from paper
-├── ppt_narration_project/       # Narration, TTS, and audio embedding
-├── paper2ppt_core/              # Core summarization logic
-├── paper2ppt_figs/              # Figure handling utilities
-├── requirements.txt
+├── paper2slides.py              # Main Entry Point: Orchestrates the full pipeline
+├── paper2ppt_cli.py             # Core Logic: Extract text, structure slides
+├── ppt_narration_project/       # Module: Handles AI narration, TTS (EdgeTTS), and Audio Embedding
+│   ├── main.py
+│   ├── tts_generator.py         # High-quality Neural TTS generation
+│   └── ...
+├── paper2ppt_core/              # Utilities: Text cleaning and sectioning
+├── models/                      # AI Model Interfaces (Qwen, etc.)
+├── scripts/                     # Helper utilities and experimental scripts
+├── archive/                     # Deprecated or legacy scripts
+├── requirements.txt             # Dependency definitions
 └── README.md
 ```
 
----
+## clean & Readable Code
 
-## Design Principles
+This project adheres to key design principles:
+1.  **Modularity**: Each step (extraction, summarization, narration, audio) is a separate module.
+2.  **Clean Output**: Temporary files are managed safely; final output is a single, professional PPTX.
+3.  **High Quality Audio**: Uses `edge-tts` for natural-sounding narration.
 
-* Modular, step-by-step pipeline
-* No manual intervention between stages
-* Clean separation of summarization, slides, and narration
-* Output optimized for presentations, not raw text inspection
 
 ---
 

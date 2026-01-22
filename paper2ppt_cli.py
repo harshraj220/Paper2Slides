@@ -1,4 +1,14 @@
 #!/usr/bin/env python3
+"""
+Paper2PPT CLI - Core Logic
+
+This module handles the extraction of content from PDF papers and the structural 
+generation of PowerPoint slides. It includes logic for:
+- PDF Text extraction and cleaning
+- Semantic section identification (Method, Results, etc.)
+- Bullet point generation and refinement
+- Image extraction and placement
+"""
 import warnings
 warnings.filterwarnings("ignore")
 
@@ -27,17 +37,17 @@ try:
     HAS_LLM = True
 except Exception:
     HAS_LLM = False
-    def qwen_generate(prompt: str, max_tokens: int = 64) -> str:
+    def qwen_generate(prompt: str, max_tokens: int = 64, temperature: float = 0.1) -> str:
         return ""
 
 # ==============================
 # CONSTANTS (CONSERVATIVE)
 # ==============================
-MAX_MODEL_CHARS = 2200
-MAX_BULLET_WORDS = 18
+MAX_MODEL_CHARS = 12000
+MAX_BULLET_WORDS = 60
 MIN_BULLET_WORDS = 6
 
-MAX_BULLETS_PER_SLIDE = 5
+MAX_BULLETS_PER_SLIDE = 6
 MIN_BULLETS_PER_SLIDE = 3
 
 
@@ -64,13 +74,13 @@ SECTION_MAP = {
 }
 
 SECTION_TARGET_BULLETS = {
-    "Overview": 6,
-    "Introduction": 8,
-    "Background": 8,
-    "Related Work": 6,
-    "Method": 6,
+    "Overview": 4,
+    "Introduction": 6,
+    "Background": 4,
+    "Related Work": 4,
+    "Method": 8,
     "Results": 6,
-    "Conclusion": 5,
+    "Conclusion": 4,
 }
 
 # ==============================
@@ -100,7 +110,7 @@ def extract_sentences(text: str) -> List[str]:
     out = []
     for s in sentences:
         wc = len(s.split())
-        if 10 <= wc <= 50:
+        if 8 <= wc <= 80:
             out.append(s.strip())
     return out
 
@@ -113,6 +123,16 @@ def rewrite_bullet(sentence: str) -> str:
     sentence = re.sub(r'(\w)-\s+(\w)', r'\1\2', sentence)
 
     s = re.sub(r"\s+", " ", sentence.strip())
+    
+    # --- CLEANUP PREFIXES (New) ---
+    # Remove "However,", "Thus,", "Therefore,", "In this paper," etc.
+    s = re.sub(r'^(however|therefore|thus|moreover|furthermore|consequently|hence|accordingly|specifically|notably|importantly|interestingly|finally|additionally)[, ]+', '', s, flags=re.IGNORECASE)
+    s = re.sub(r'^(in this paper|in this work|we show that|we demonstrate that|we find that|it is observed that)[, ]+', '', s, flags=re.IGNORECASE)
+    
+    # Capitalize after strip
+    if s:
+        s = s[0].upper() + s[1:]
+
     low = s.lower()
 
     # --- GLOBAL STRUCTURAL REJECTIONS ---
@@ -129,30 +149,10 @@ def rewrite_bullet(sentence: str) -> str:
     if "…" in s or "..." in s:
         return ""
 
-    sentence = re.sub(r'(\w)-\s+(\w)', r'\1\2', sentence)
-
-    s = re.sub(r"\s+", " ", sentence.strip())
-    low = s.lower()
-
-    s = re.sub(r"\s+", " ", sentence.strip())
-    low = s.lower()
-
-    # Reject bullets starting with conjunctions
-    if re.match(r'^(and|but|or)\b', low):
-        return ""
-
-    # Reject citation residue / orphaned years / parentheses
-    if re.match(r'^\(?\d{4}\)?\)', s.strip()) or s.strip().startswith(")"):
-        return ""
-
     # Reject numeric-only figure references (e.g., "5 illustrates ...")
     if re.match(r'^\d+\s+(illustrates|shows|presents)', low):
         return ""
 
-
-    # 1. Reject ellipsis / truncation artifacts
-    if "…" in s or "..." in s:
-        return ""
 
     # 2. Reject broken comparative or numeric claims
     if re.search(r"\b(by over|achieves|improves|outperforms)\b\s*(,|\.|$)", low):
@@ -162,8 +162,12 @@ def rewrite_bullet(sentence: str) -> str:
     if re.search(r"\b(by|over|of|with|to|for|in|on)\s*\.$", low):
         return ""
 
-    # 4. Reject table / figure / section metadata
-    if re.search(r"\b(table|figure|fig\.|section)\s+\d+", low):
+    # 4. Reject purely navigational table / figure / section references
+    # (Revised to ALLOW "Table 1 shows..." but REJECT "See Table 1")
+    if re.search(r"^\s*(see|refer to|shown in|details in|as seen in)\s+(table|figure|fig\.|section)\s+\d+", low):
+        return ""
+    # Reject short captions disguised as sentences
+    if re.match(r"^(table|figure|fig\.)\s+\d+\.?\s*$", low):
         return ""
 
     # 5. Reject obvious author / repo / citation noise
@@ -173,20 +177,20 @@ def rewrite_bullet(sentence: str) -> str:
     ]):
         return ""
 
-    if not sentence:
+    if not s:
         return ""
 
     # Normalize whitespace
-    s = re.sub(r'\s+', ' ', sentence.strip())
+    s = re.sub(r'\s+', ' ', s.strip())
 
     low = s.lower()
 
     # Drop obvious noise / metadata
     if any(x in low for x in [
-        "et al.", "arxiv", "figure", "table",
-        "acknowledgement", "references",
+        "et al.", "arxiv", "acknowledgement", "references",
         "conference", "proceedings",
         "nips", "neurips"
+        # Removed "table", "figure" from here to allow legitimate discussion
     ]):
         return ""
 
@@ -198,11 +202,13 @@ def rewrite_bullet(sentence: str) -> str:
     words = s.split()
 
     # Length guard (conservative)
-    if len(words) < MIN_BULLET_WORDS or len(words) > 45:
+    # Using MAX_BULLET_WORDS constant (60)
+    if len(words) < MIN_BULLET_WORDS or len(words) > MAX_BULLET_WORDS:
         return ""
 
     # Capitalize safely
-    s = s[0].upper() + s[1:]
+    if s:
+        s = s[0].upper() + s[1:]
 
     # Ensure proper sentence ending
     if not s.endswith("."):
@@ -225,7 +231,7 @@ def is_complete_sentence(sentence: str) -> bool:
 
     # Must contain a verb
     if not re.search(
-        r"\b(is|are|was|were|has|have|achieves|uses|shows|demonstrates|improves|reduces|introduces|presents)\b",
+        r"\b(is|are|was|were|has|have|achieves|uses|shows|demonstrates|improves|reduces|introduces|presents|validates|evaluates|employs|contains|includes|consists|resulted|outperformed)\b",
         s
     ):
         return False
@@ -299,10 +305,10 @@ def finalize_bullet(bullet: str) -> str:
 # ==============================
 def final_bullets(candidates: List[str]) -> List[str]:
     """
-    STEP-4: Slightly increase content density safely.
-    - Accepts more valid academic sentences
+    Final refinement step for bullet points.
+    - Accepts valid academic sentences
     - Prevents duplicates and fragments
-    - Never truncates sentences
+    - Ensures punctuation
     """
     out = []
     seen = set()
@@ -328,8 +334,8 @@ def final_bullets(candidates: List[str]) -> List[str]:
 
         # Must have meaning signal
         has_signal = (
-            re.search(r"\b(is|are|was|were|uses|achieves|shows|demonstrates|improves|reduces|introduces|presents)\b", low)
-            or re.search(r"\b(model|approach|method|architecture|framework|system|mechanism|network)\b", low)
+            re.search(r"\b(is|are|was|were|uses|achieves|shows|demonstrates|improves|reduces|introduces|presents|stacks|computes|trains|learns|optimizes|functions|generates|outputs|inputs|consists|comprises|employs|utilizes|applies|contains|includes)\b", low)
+            or re.search(r"\b(model|approach|method|architecture|framework|system|mechanism|network|layer|attention|encoder|decoder|data|training|loss|transformer|embedding|projection|softmax|normalization)\b", low)
         )
 
         if not has_signal:
@@ -352,7 +358,7 @@ def final_bullets(candidates: List[str]) -> List[str]:
     return out
 
 # ==============================
-# STEP-4: CONTROLLED BULLET EXPANSION (SAFE)
+# SECURE EXPANSION (SAFE)
 # ==============================
 def add_one_more_safe_bullet(
     existing_bullets: List[str],
@@ -388,7 +394,7 @@ def add_one_more_safe_bullet(
 
         # Must contain a verb-like signal
         if not re.search(
-            r"\b(is|are|was|were|uses|shows|demonstrates|achieves|improves|reduces|introduces|presents)\b",
+            r"\b(is|are|was|were|uses|shows|demonstrates|achieves|improves|reduces|introduces|presents|stacks|computes|trains|learns|utilizes|employs|generates)\b",
             low,
         ):
             continue
@@ -517,14 +523,7 @@ def generate_image_caption(section: str) -> str:
 # STEP-4: DEDUPLICATION & DENSITY CONTROL
 # ==============================
 
-SECTION_TARGET_BULLETS = {
-    "Overview": 6,
-    "Introduction": 7,
-    "Background": 6,
-    "Method": 9,
-    "Results": 8,
-    "Conclusion": 4,
-}
+# SECTION_TARGET_BULLETS used from top of file
 
 def deduplicate_bullets(bullets, overlap_threshold=0.7):
     """
@@ -576,6 +575,90 @@ def remove_low_signal_bullets(bullets):
     return clean
 
 
+# ==============================
+# QWEN SUMMARIZATION LOGIC
+# ==============================
+
+def extract_title_with_qwen(first_page_text: str) -> str:
+    if not HAS_LLM:
+        return ""
+    prompt = f"""
+    Identify the title of the research paper from the following text (first page content).
+    Return ONLY the title, nothing else. Do not add quotes.
+    
+    TEXT:
+    {first_page_text[:2000]}
+    
+    TITLE:
+    """
+    try:
+        title = qwen_generate(prompt, max_tokens=64).strip()
+        # Clean up if it's too long or has newlines
+        title = title.replace("\n", " ")
+        # Remove common prefixes if Qwen generated them
+        if title.lower().startswith("title:"):
+            title = title[6:].strip()
+        if len(title) > 300: # Sanity check
+             return "" 
+        return title
+    except Exception as e:
+        print(f"[WARN] Title extraction failed: {e}")
+        return ""
+
+def summarize_section_with_qwen(section_title: str, section_text: str, target_bullets: int) -> List[str]:
+    """
+    Uses Qwen to generate high-quality bullet points for the slide.
+    """
+    if not HAS_LLM:
+        return []
+
+    print(f"[INFO] Using Qwen LLM for summarization of section: {section_title}")
+
+    prompt = f"""
+You are an expert research scientist assisting in creating a high-quality presentation.
+Your goal is to EXTRACT key technical details from the provided text into clear, standalone bullet points.
+Avoid generic summaries. Use specific details, numbers, and terminology from the text.
+
+SECTION: {section_title}
+TEXT:
+{section_text[:4000]}
+
+INSTRUCTIONS:
+1. Extract exactly {target_bullets + 2} distinct key points.
+2. Each bullet must be a COMPLETE sentence ending with a period.
+3. BE SPECIFIC: Include metrics, method names, and architectural details if present.
+4. MATH & TABLES: 
+   - If meaningful tables exist, extract their key insights as bullets.
+   - If important mathematical formulas exist, include them as readable text or simple LaTeX (e.g., "Loss L = ...") within a sentence.
+   - Ensure these are integrated naturally as bullet points.
+5. NO FILLER: Do not use "The paper discusses...", "This section shows...", etc. Start directly with the fact.
+6. NO HALLUCINATIONS: Only usage information present in the text.
+7. IGNORE citations (e.g. [12]), figures (e.g. Fig 1), and acknowledgments.
+8. FORMAT: Return a simple list where each line starts with "- ".
+
+OUTPUT:
+"""
+    try:
+        response = qwen_generate(prompt, max_tokens=1024)
+        # Parse bullets
+        bullets = []
+        for line in response.split('\n'):
+            line = line.strip()
+            # Strict parsing for bullets
+            if line.startswith("- ") or line.startswith("* "):
+                clean_line = line[2:].strip()
+                if len(clean_line) > 15: # slightly stricter length check
+                     # Ensure it looks like a sentence
+                    if not clean_line.endswith('.'):
+                        clean_line += '.'
+                    bullets.append(f"* {clean_line}")
+            
+        return bullets
+    except Exception as e:
+        print(f"[WARNING] Qwen summarization failed for {section_title}: {e}")
+        return []
+
+
 def limit_section_bullets(section, bullets):
     target = SECTION_TARGET_BULLETS.get(section)
     if not target:
@@ -601,23 +684,32 @@ def generate_slides(input_pdf: str, output_ppt: str, max_bullets=4):
         text = normalize_pdf_text(sec.get("text", ""))[:MAX_MODEL_CHARS]
         sentences = extract_sentences(text)
 
-        target = SECTION_TARGET_BULLETS.get(section, max_bullets * 4)
-        rewritten = [rewrite_bullet(s) for s in sentences[:target * 2]]
-
-        bullets = final_bullets(rewritten)
-
-        # STEP-4: controlled content expansion
-        target = SECTION_TARGET_BULLETS.get(section, max_bullets)
-
-        rewritten = [
-            rewrite_bullet(s)
-            for s in sentences[:target * 3]
-        ]
-        bullets = add_one_more_safe_bullet(
-            bullets,
-            sentences,
-            target,
-        )
+        target = SECTION_TARGET_BULLETS.get(section, 15)
+        
+        # --- NEW: TRY QWEN FIRST ---
+        bullets = summarize_section_with_qwen(section, text, target)
+        
+        # --- FALLBACK: USE RULE-BASED IF QWEN FAILS OR RETURNS NOTHING ---
+        if not bullets:
+            print(f"[INFO] Qwen yielded no bullets for {section}, using regex fallback.")
+            rewritten = [rewrite_bullet(s) for s in sentences]
+            bullets = final_bullets(rewritten)
+            
+            rewritten_all = [rewrite_bullet(s) for s in sentences]
+            bullets = add_one_more_safe_bullet(bullets, sentences, target)
+            bullets = [light_polish_bullet(b) for b in bullets]
+            bullets = enhance_bullet_flow(bullets)
+            bullets = polish_bullets(bullets)
+            bullets = deduplicate_bullets(bullets)
+            bullets = remove_low_signal_bullets(bullets)
+            bullets = limit_section_bullets(section, bullets)
+        
+        # If Qwen worked, we still run a light cleanup pass
+        else:
+             bullets = [light_polish_bullet(b) for b in bullets]
+             # Ensure we don't have too many if Qwen hallucinated extra
+             if len(bullets) > target + 5:
+                 bullets = bullets[:target+5]
 
         bullets = [light_polish_bullet(b) for b in bullets]
 
@@ -628,11 +720,11 @@ def generate_slides(input_pdf: str, output_ppt: str, max_bullets=4):
         bullets = enhance_bullet_flow(bullets)
         bullets = polish_bullets(bullets)
 
-        # ===== STEP-4 =====
+        # ===== DEDUPLICATION & FILTERING =====
         bullets = deduplicate_bullets(bullets)
         bullets = remove_low_signal_bullets(bullets)
         bullets = limit_section_bullets(section, bullets)
-        # ==================
+        # =====================================
 
         bullet_chunks = chunk_bullets(bullets)
 
@@ -662,9 +754,30 @@ def generate_slides(input_pdf: str, output_ppt: str, max_bullets=4):
 
 
 
-    doc_title = pages_text[0].split("\n")[0] if pages_text else Path(input_pdf).stem
+    # --- INTELLIGENT TITLE EXTRACTION ---
+    print("[paper2ppt] Determining presentation title...")
+    doc_title = ""
+    if pages_text:
+        # 1. Try Qwen Extraction
+        doc_title = extract_title_with_qwen(pages_text[0])
+        if doc_title:
+             print(f"[paper2ppt] Title extracted via Qwen: {doc_title}")
+        
+        # 2. Fallback to first line
+        if not doc_title or len(doc_title) < 5:
+            doc_title = pages_text[0].split("\n")[0]
+            print(f"[paper2ppt] Title extracted via First Line: {doc_title}")
+
+    # 3. Last resort fallback
+    if not doc_title or len(doc_title) < 5:
+        doc_title = Path(input_pdf).stem
+        print(f"[paper2ppt] Title fallback to filename: {doc_title}")
+    
+    # -------------------------------------
+
     ppt = build_presentation(slides_plan, output_ppt, doc_title, sections)
     return ppt, slides_plan
+
 
 def attach_narration(presentation, slides_plan):
     for slide, plan in zip(presentation.slides, slides_plan):

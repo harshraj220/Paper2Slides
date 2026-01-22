@@ -19,6 +19,10 @@ venv/
 Thumbs.db
 .vscode/
 .idea/
+*.swp
+*.swo
+*~
+*.save
 
 # ===============================
 # Generated Presentations
@@ -63,3 +67,9 @@ paper2ppt11
 tmp/
 temp/
 .cache/
+
+# ===============================
+# Additional Generated Content
+# ===============================
+paper2ppt_audio/
+paper2ppt_figs/

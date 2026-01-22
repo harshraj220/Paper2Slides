@@ -37,6 +37,13 @@ def is_heading_line(line: str) -> bool:
 
     # numbered section headers ONLY (not captions)
     if re.match(r"^\s*\d+(\.\d+)*\s+[A-Z][A-Za-z\s]{2,60}$", l):
+        # Reject affiliation-like headers
+        if any(x in l.lower() for x in [
+            "research", "university", "institute", "department",
+            "laboratory", "corporation", "inc.", "ltd", "school",
+            "college", "faculty", "center", "centre", "group", "association"
+        ]):
+             return False
         return True
 
     return False

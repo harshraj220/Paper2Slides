@@ -3,7 +3,7 @@
 python-pptx>=1.0.2
 PyMuPDF>=1.24.1
 Pillow>=10.3.0
-pyttsx3>=2.90
+edge-tts>=6.1.9
 
 # AI / ML
 torch>=2.2.0

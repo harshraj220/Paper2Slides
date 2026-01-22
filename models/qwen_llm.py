@@ -51,7 +51,7 @@ def _lazy_load() -> None:
 
 
 
-def qwen_generate(prompt: str, max_tokens: int = 72) -> str:
+def qwen_generate(prompt: str, max_tokens: int = 72, temperature: float = 0.1) -> str:
     global _tokenizer, _model
 
     _lazy_load()
@@ -77,7 +77,7 @@ def qwen_generate(prompt: str, max_tokens: int = 72) -> str:
         input_ids=input_ids,
         attention_mask=attention_mask,
         max_new_tokens=max_tokens,
-        temperature=0.1,      # narration = low creativity
+        temperature=temperature,
         top_p=0.8,
         do_sample=True,
         eos_token_id=model.config.eos_token_id,

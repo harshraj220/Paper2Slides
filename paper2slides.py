@@ -1,3 +1,17 @@
+"""
+Paper2Slides Entry Point
+
+This script serves as the main orchestrator for the Research2Presentation pipeline.
+It handles:
+1.  Command Line Interface (CLI) arguments.
+2.  Delegation to `paper2ppt_cli` for structural slide generation.
+3.  Delegation to `ppt_narration_project` for AI narration and Audio embedding.
+4.  Final cleanup and file renaming.
+
+Usage:
+    python3 paper2slides.py <input_pdf>
+"""
+
 import os
 import sys
 

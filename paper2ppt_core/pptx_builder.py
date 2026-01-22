@@ -266,6 +266,27 @@ def build_presentation(slides_plan, output_path, doc_title, sections, theme_name
 
     print(f"\n[PPTX] Building presentation with {len(slides_plan)} slides...")
 
+    # --- TITLE SLIDE ---
+    title_slide = prs.slides.add_slide(prs.slide_layouts[0]) 
+    
+    # White background
+    bg = title_slide.background
+    bg.fill.solid()
+    bg.fill.fore_color.rgb = RGBColor(255, 255, 255)
+
+    if title_slide.shapes.title:
+        title_slide.shapes.title.text = doc_title
+        title_slide.shapes.title.text_frame.paragraphs[0].font.color.rgb = rgb(theme["text_color"])
+        title_slide.shapes.title.text_frame.paragraphs[0].font.bold = True
+    
+    if len(title_slide.placeholders) > 1:
+        subtitle = title_slide.placeholders[1]
+        subtitle.text = f"Research Summary & Analysis\nGenerated on {datetime.utcnow().strftime('%Y-%m-%d')}"
+        subtitle.text_frame.paragraphs[0].font.color.rgb = rgb(theme["accent_color"])
+
+    _draw_footer(title_slide, prs, theme)
+    # -------------------
+
     for idx, s in enumerate(slides_plan):
         slide = prs.slides.add_slide(blank)
         
@@ -292,6 +313,21 @@ def build_presentation(slides_plan, output_path, doc_title, sections, theme_name
             add_images(slide, prs, images, theme)
         
         _draw_footer(slide, prs, theme)
+
+    # --- END SLIDE ---
+    end_slide = prs.slides.add_slide(blank)
+    bg = end_slide.background
+    bg.fill.solid()
+    bg.fill.fore_color.rgb = RGBColor(255, 255, 255)
+    
+    box = end_slide.shapes.add_textbox(Inches(1), Inches(3), prs.slide_width - Inches(2), Inches(2))
+    tf = box.text_frame
+    p = tf.paragraphs[0]
+    p.text = "Thank You\n\nQuestions?"
+    p.alignment = PP_ALIGN.CENTER
+    p.font.size = Pt(36)
+    p.font.color.rgb = rgb(theme["accent_color"])
+    # -----------------
 
     # Save presentation
     prs.save(output_path)

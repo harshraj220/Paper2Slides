@@ -35,7 +35,8 @@ except Exception:
 # ============ CONFIG ============
 
 SUMMARY_MODEL = None         # Disable transformer model
-TARGET_BULLETS_PER_SECTION = 6
+TARGET_BULLETS_PER_SECTION = 20  # Increased to allow more content
+
 BULLETS_PER_SLIDE = 5
 MAX_SECTION_CHARS = 4000
 AUDIO_OUT_DIR = Path("paper2ppt_audio")
@@ -125,18 +126,53 @@ def split_into_sections(pages):
 def summarize_section_to_bullets(text: str, n: int = 5) -> List[str]:
     """
     No transformer — heuristic split.
+    Preserves punctuation to ensure sentences look complete.
     """
-    parts = re.split(r"[.!?]", text)
-    bullets = [p.strip() for p in parts if len(p.strip()) > 6]
+    # Split keeping the delimiter
+    parts = re.split(r"([.!?])", text)
+    
+    bullets = []
+    current_sentence = ""
+    
+    for p in parts:
+        if not p:
+            continue
+        if p in ".!?":
+            current_sentence += p
+            if len(current_sentence.strip()) > 10:  # slight increase in min length
+                bullets.append(current_sentence.strip())
+            current_sentence = ""
+        else:
+            current_sentence += p
+            
+    # Catch any remainder
+    if len(current_sentence.strip()) > 10:
+        bullets.append(current_sentence.strip())
+
     return bullets[:n] if bullets else ["Summary not available."]
 
 # ============ NARRATION ============
 
-def generate_narration_from_bullets(bullets: List[str], max_words=40):
+def generate_narration_from_bullets(bullets: List[str], max_words=150):
     t = " ".join(bullets)
     narration = "Here is a brief explanation of this slide: " + t
+    # Instead of hard cutting words, we try to keep it reasonable but complete
     words = narration.split()
-    return " ".join(words[:max_words]) + ("." if len(words) > max_words else "")
+    if len(words) <= max_words:
+        return narration
+    
+    # If we must cut, try to cut at a punctuation
+    truncated = " ".join(words[:max_words])
+    # finding last punctuation
+    last_dot = truncated.rfind('.')
+    last_excl = truncated.rfind('!')
+    last_q = truncated.rfind('?')
+    cut_idx = max(last_dot, last_excl, last_q)
+    
+    if cut_idx > 0:
+        return truncated[:cut_idx+1]
+    
+    return truncated + "..."
 
 # ============ TTS ENGINE ============
 
@@ -263,13 +299,32 @@ def main(input_file, output_file):
     sections = split_into_sections(pages_text)
 
     slides_plan = []
+    
     for s in sections:
-        bullets = summarize_section_to_bullets(s["text"],
-                                               TARGET_BULLETS_PER_SECTION)
-        slides_plan.append({
-            "title": s["title"].title(),
-            "bullets": bullets
-        })
+        # 1. Get ALL valid bullets (up to limit)
+        section_bullets = summarize_section_to_bullets(s["text"], TARGET_BULLETS_PER_SECTION)
+        
+        # 2. Chunk them for pagination
+        chunk_size = BULLETS_PER_SLIDE
+        if not section_bullets:
+             # If empty, maybe just skip or add a placeholder?
+             # Let's verify if we want empty sections.
+             continue
+             
+        # Create chunks
+        # e.g. [0, 5, 10...]
+        for i in range(0, len(section_bullets), chunk_size):
+            chunk = section_bullets[i : i + chunk_size]
+            
+            # Determine title
+            slide_title = s["title"].title()
+            if i > 0:
+                slide_title += " (Continued)"
+            
+            slides_plan.append({
+                "title": slide_title,
+                "bullets": chunk
+            })
 
     if not slides_plan:
         raise RuntimeError("No slides produced.")
