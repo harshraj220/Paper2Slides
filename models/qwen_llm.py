@@ -1,113 +1,66 @@
 import os
-os.environ["HF_HUB_DISABLE_PROGRESS_BARS"] = "1"
-os.environ["TRANSFORMERS_VERBOSITY"] = "error"
-from typing import Optional, cast
+import requests
+import json
 
-# pyright: reportMissingImports=false
-
-import torch 
-
-from transformers import (        
-
-    AutoTokenizer,
-    AutoModelForCausalLM,
-    PreTrainedTokenizerBase,
-    PreTrainedModel,
-)
-
-MODEL_ID = "Qwen/Qwen2.5-7B-Instruct"
-
-# Global singletons
-_tokenizer: Optional[PreTrainedTokenizerBase] = None
-_model: Optional[PreTrainedModel] = None
-
-
-def _lazy_load() -> None:
-    """
-    Load tokenizer and model exactly once.
-    """
-    global _tokenizer, _model
-
-    if _tokenizer is not None and _model is not None:
-        return
-
-    print("[QWEN] Loading tokenizer and model (one-time)...")
-
-    _tokenizer = AutoTokenizer.from_pretrained(
-        MODEL_ID,
-        trust_remote_code=True,
-    )
-
-    _model = AutoModelForCausalLM.from_pretrained(
-        MODEL_ID,
-        device_map="cuda:1",
-        torch_dtype=torch.float16,
-        load_in_4bit=True,
-        trust_remote_code=True,
-    )
-
-    assert _model is not None
-    _model.eval()
-
-
+# Fetch API key from environment
+# We use OpenRouter because they offer Qwen 2.5 7B completely for FREE
+OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY", "")
 
 def qwen_generate(prompt: str, max_tokens: int = 72, temperature: float = 0.1) -> str:
-    global _tokenizer, _model
+    """
+    Generate text using Qwen via OpenRouter's free API.
+    """
+    if not OPENROUTER_API_KEY:
+        print("ERROR: OPENROUTER_API_KEY is not set. Please set it in your environment or Streamlit secrets.")
+        return "ERROR: OPENROUTER_API_KEY is not set. Please set it to use the AI features."
 
-    _lazy_load()
+    url = "https://openrouter.ai/api/v1/chat/completions"
+    
+    headers = {
+        "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+        "HTTP-Referer": "https://github.com/harshraj220/Paper2Slides",
+        "X-Title": "Paper2Slides",
+        "Content-Type": "application/json"
+    }
+    
+    data = {
+        # This specific model string uses OpenRouter's free tier
+        "model": "qwen/qwen-2.5-7b-instruct:free",
+        "messages": [
+            {"role": "user", "content": prompt}
+        ],
+        "max_tokens": max_tokens,
+        "temperature": temperature,
+        "top_p": 0.8,
+        "repetition_penalty": 1.1
+    }
+    
+    try:
+        response = requests.post(url, headers=headers, json=data)
+        response.raise_for_status()
+        
+        result = response.json()
+        text = result["choices"][0]["message"]["content"].strip()
+        
+        # --- HARD STOP: remove chat / role leakage ---
+        for stop in ["Human:", "Assistant:", "System:"]:
+            if stop in text:
+                text = text.split(stop)[0].strip()
 
-    assert _tokenizer is not None
-    assert _model is not None
-
-    tokenizer = cast(PreTrainedTokenizerBase, _tokenizer)
-    model = cast(PreTrainedModel, _model)
-
-    inputs = tokenizer(
-        prompt,
-        return_tensors="pt",
-        truncation=True,
-        max_length=2048,
-    ).to(model.device)
-
-    with torch.no_grad():
-        input_ids = inputs["input_ids"]
-        attention_mask = inputs.get("attention_mask")
-
-        outputs = model.generate(
-        input_ids=input_ids,
-        attention_mask=attention_mask,
-        max_new_tokens=max_tokens,
-        temperature=temperature,
-        top_p=0.8,
-        do_sample=True,
-        repetition_penalty=1.1,
-        eos_token_id=model.config.eos_token_id,
-    )
-
-
-
-    generated_ids = outputs[0][input_ids.shape[-1]:]
-    text = tokenizer.decode(
-        generated_ids,
-        skip_special_tokens=True,
-    ).strip()
-
-    # --- HARD STOP: remove chat / role leakage ---
-    for stop in ["Human:", "Assistant:", "System:"]:
-        if stop in text:
-            text = text.split(stop)[0].strip()
-
-    # Remove leading meta phrases
-    for prefix in [
-        "Sure,",
-        "Here is",
-        "Here's",
-        "Here’s",
-    ]:
-        if text.startswith(prefix):
-            text = text[len(prefix):].lstrip(" :,-")
-
-    return text
-
-
-  
+        # Remove leading meta phrases
+        for prefix in [
+            "Sure,",
+            "Here is",
+            "Here's",
+            "Here’s",
+        ]:
+            if text.startswith(prefix):
+                text = text[len(prefix):].lstrip(" :,-")
+                
+        return text
+    
+    except Exception as e:
+        print(f"API Error: {e}")
+        if 'response' in locals() and hasattr(response, 'text'):
+            print(f"Response: {response.text}")
+        return f"Error generating response: {str(e)}"
