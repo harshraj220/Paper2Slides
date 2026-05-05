@@ -898,7 +898,7 @@ def main():
     args = ap.parse_args()
 
     # First generate the slides (returns the output path)
-    out, slides_plan = generate_slides(args.input, args.output, args.max_bullets)
+    out, slides_plan, sections, doc_title = generate_slides(args.input, args.output, args.max_bullets)
 
     if args.narration == "explanatory":
         prs = Presentation(args.output)
