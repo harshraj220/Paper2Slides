@@ -1,184 +1,121 @@
-# Paper2Slides
+<div align="center">
+  <h1>🎙️ Paper2Slides</h1>
+  <p><strong>Transform Research Papers into Narrated, Presentation-Ready PowerPoints in Seconds</strong></p>
 
-# Paper2Slides
+  [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
+  [![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://deckify.streamlit.app/)
+  [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-Paper2Slides is an automated pipeline that converts research papers into concise presentation slides with hidden narration and embedded audio, producing presentation-ready PowerPoint files from a single command.
-
----
-
-## Features
-
-* Converts research papers (PDF) into summarized presentation slides
-* Generates clean, topic-based slides suitable for academic and technical talks
-* Automatically creates narration aligned with each slide
-* Embeds narration as hidden speaker notes and audio
-* Maintains a clean slide layout without exposing narration text
-* End-to-end automation with a single command
+</div>
 
 ---
 
-## How It Works
+## 🌟 Overview
 
-1. Extracts and summarizes content from a research paper
-2. Generates structured slides with titles and bullet points
-3. Creates detailed narration for each slide (hidden from view)
-4. Converts narration into audio
-5. Embeds narration and audio into the final presentation
+**Paper2Slides** is an end-to-end automated pipeline and web application that instantly converts academic research papers (PDFs) into concise, high-quality presentation slides. 
 
-The user receives **one final PPTX file** containing:
-````markdown
+Beyond just summarizing text, Paper2Slides intelligently extracts diagrams and tables, generates a logical presentation flow, and synthesizes **hidden speaker notes and TTS narration audio** for every single slide.
 
-# Paper2Slides
-
-Paper2Slides is an automated pipeline that converts research papers into concise presentation slides with hidden narration and embedded audio, producing presentation-ready PowerPoint files from a single command.
+Whether you are preparing for a conference, a seminar, or a quick lab meeting, Paper2Slides handles the heavy lifting so you can focus on the delivery.
 
 ---
 
-## Features
+## ✨ Key Features
 
-* Converts research papers (PDF) into summarized presentation slides
-* Generates clean, topic-based slides suitable for academic and technical talks
-* Automatically creates narration aligned with each slide
-* Embeds narration as hidden speaker notes and audio
-* Maintains a clean slide layout without exposing narration text
-* End-to-end automation with a single command
-
----
-
-## How It Works
-
-1. Extracts and summarizes content from a research paper
-2. Generates structured slides with titles and bullet points
-3. Creates detailed narration for each slide (hidden from view)
-4. Converts narration into audio
-5. Embeds narration and audio into the final presentation
-
-The user receives **one final PPTX file** containing:
-
-* Visible summarized slides
-* Hidden narration (speaker notes + audio)
+- 📄 **Smart PDF Extraction**: Seamlessly extracts text, headings, mathematical context, tables, and visual figures from academic PDFs.
+- 🧠 **AI-Powered Summarization**: Uses **Qwen 2.5 7B** (via OpenRouter) to abstract high-level concepts and generate concise, impactful bullet points.
+- 🎨 **Automated Layouts**: Assembles slides dynamically, automatically chunking long sections to prevent text-heavy slides.
+- 🗣️ **Neural Narration (TTS)**: Automatically writes explanatory speaker notes and generates high-quality audio using `edge-tts`.
+- 💬 **Interactive Chat Refinement**: A built-in chat interface allows you to ask questions and refine specific slides on the fly.
+- ☁️ **Cloud Ready**: Lightweight dependency structure, easily deployable to Streamlit Community Cloud.
 
 ---
 
-## Installation
+## 🚀 Live Demo
 
-Clone the repository and install dependencies:
+Try the live web application directly in your browser:
+👉 **[Deckify on Streamlit](https://deckify.streamlit.app/)**
 
+---
+
+## 💻 Local Installation
+
+To run Paper2Slides on your local machine, follow these steps:
+
+### 1. Clone the Repository
+```bash
+git clone https://github.com/harshraj220/Paper2Slides.git
+cd Paper2Slides
+```
+
+### 2. Install Dependencies
+Ensure you have Python 3.11+ installed.
 ```bash
 pip install -r requirements.txt
 ```
 
-Ensure you have a compatible Python environment and required system dependencies for text-to-speech.
-
----
-
-## Usage
-
-Run the pipeline with a research paper as input:
-
+### 3. Configure API Keys
+Paper2Slides uses the OpenRouter API for free access to Qwen 2.5. Export your API key in your terminal:
 ```bash
-python3 paper2slides.py <paper.pdf>
+export OPENROUTER_API_KEY="your-openrouter-api-key-here"
 ```
 
-Example:
+---
 
+## 🛠️ Usage
+
+### Running the Web Application (Streamlit)
+To launch the interactive web UI:
 ```bash
-python3 paper2slides.py aiawn.pdf
+streamlit run app.py
+```
+
+### Running the CLI Pipeline
+If you prefer to generate presentations directly from the command line:
+```bash
+python3 paper2slides.py path/to/your/paper.pdf
+```
+*Output: A file named `<paper_name>_summary_with_narration.pptx` will be generated in the root directory.*
+
+---
+
+## 📂 Project Architecture
+
+```text
+Paper2Slides/
+├── app.py                       # Streamlit Web Application Entry Point
+├── paper2slides.py              # CLI Entry Point & Interactive Refinement Loop
+├── paper2ppt_cli.py             # Core Engine: Orchestrates extraction & layout
+├── models/
+│   └── qwen_llm.py              # OpenRouter API wrapper for Qwen 2.5
+├── paper2ppt_core/
+│   ├── summarize.py             # AI prompt engineering & summarization logic
+│   ├── sections.py              # Academic section detection & filtering
+│   ├── io.py                    # PDF parsing and image extraction (PyMuPDF)
+│   └── pptx_builder.py          # PowerPoint XML generation engine
+├── ppt_narration_project/       
+│   ├── narration_generator.py   # AI script writing for speaker notes
+│   ├── tts_generator.py         # Neural TTS generation via Edge-TTS
+│   └── ppt_audio_embedder.py    # Embeds audio directly into PPTX slides
+└── requirements.txt             # Lightweight dependencies for cloud deployment
 ```
 
 ---
 
-## Output
+## 🧠 Design Philosophy
 
-* One PowerPoint file named after the input paper:
-
-  ```
-  <paper_name>_summary_with_narration.pptx
-  ```
-* Slides contain concise summaries
-* Narration is embedded as speaker notes and audio
-* No manual steps required
+1. **Noise Reduction over Raw Extraction**: Academic papers are filled with equations, citations, and dense formatting. Paper2Slides is heavily prompted to abstract concepts rather than copy-pasting garbled text.
+2. **Accessible AI**: By migrating from heavy local GPU models to the OpenRouter API, this tool runs instantly on any laptop and easily deploys to free cloud tiers.
+3. **Human-in-the-Loop**: Generating slides isn't a one-shot process. The interactive chat loop allows users to critique and regenerate specific sections without starting over.
 
 ---
 
-## Project Structure
+## 🤝 Contributing
 
-The project is organized efficiently to separate listing, generation, and narration concerns:
-
-```
-paper2slides/
-├── paper2slides.py              # Main Entry Point: Orchestrates the full pipeline
-├── paper2ppt_cli.py             # Core Logic: Extract text, structure slides
-├── ppt_narration_project/       # Module: Handles AI narration, TTS (EdgeTTS), and Audio Embedding
-│   ├── main.py
-│   ├── tts_generator.py         # High-quality Neural TTS generation
-### Step 6: Interactive Query & Update (New!)
-*   **Code**: `paper2slides.py` (Main Loop), `paper2ppt_cli.py` (Slide Matching)
-*   **Action**:
-    *   Once the initial presentation is built, the system enters an **Interactive Mode**.
-    *   It prompts you: `Type your query (or 'exit'/'quit' to finish):`.
-    *   You can ask questions (e.g., "Explain the methodology in more detail").
-    *   The system uses **Qwen-2.5** to find the relevant section, generate a detailed explanation, and convert it into presentation bullets.
-    *   If you approve the update, it **automatically updates the slides** and **regenerates the narration** for that section.
-    *   It handles **dynamic slide expansion**: if the new explanation is long, it splits the content into multiple slides.
-
-### Step 7: Final Assembly
-*   **Code**: `ppt_narration_project/ppt_audio_embedder.py`
-*   **Action**: It inserts the generated audio files onto the correct slides set to "Play in Background". It saves the final result as `<paper_name>_summary_with_narration.pptx`.
+Contributions, issues, and feature requests are welcome! Feel free to check the [issues page](https://github.com/harshraj220/Paper2Slides/issues).
 
 ---
 
-## 🛠️ Advanced Configuration
-
-### Excluding Sections/Affiliations
-The system uses a smart filter to ignore author lists and affiliations. This is configured in `paper2ppt_core/sections.py`. It currently filters out:
-*   Universities (e.g., "UC", "MIT", "Institute")
-*   Tech Companies (e.g., "Microsoft", "Google", "Meta")
-*   Addresses & Metadata ("Street", "Box", "Copyright")
-
-### Slide chunking
-*   Default limit per slide: **5 bullets**.
-*   If content exceeds this (e.g., detailed interactive updates), formatting is preserved by splitting across `Title` and `Title (continued)` slides.
-
----
-
-## ❓ Troubleshooting
-
-**Q: The system hangs on "Using Qwen LLM for..."**
-*   **A**: This is the model generating text. On slower CPUs, this might take 1-2 minutes per section. Please be patient. We have optimized `max_tokens` to 512 to improve speed.
-
-**Q: My query isn't finding the right section.**
-*   **A**: Ensure your query uses keywords present in the paper (e.g., "Architecture" vs "Method"). The system uses semantic fuzzy matching, but specific terms help.
-
-**Q: The presentation has "Ghost" sections (e.g., References).**
-*   **A**: The section filtering logic usually catches these. If one slips through, you can list it in the `SKIP_SECTIONS` set in `paper2ppt_cli.py`.
-
----
-
-## Project Structure
-
-```
-paper2slides/
-├── paper2slides.py              # Main Entry Point & Interactive Loop
-├── paper2ppt_cli.py             # Core Logic: Extraction, Filtering, & Slide Management
-├── ppt_narration_project/       # Module: Narration, TTS, audio embedding
-│   ├── main.py
-│   ├── narration_generator.py   # AI Script Writing (Qwen)
-│   ├── tts_generator.py         # Neural TTS (Edge-TTS)
-│   └── ppt_audio_embedder.py    # PowerPoint Audio Insertion
-├── paper2ppt_core/              # Utilities
-│   ├── sections.py              # Section detection & Header filtering
-│   ├── pptx_builder.py          # Slide layout engine
-│   └── io.py                    # PDF Reading & Image Extraction
-├── models/                      # AI Model Interfaces
-│   └── qwen_llm.py              # Local LLM wrapper
-├── requirements.txt
-└── README.md
-```
-
-## Design Principles
-
-1.  **Generalization**: The pipeline is robust to different paper formats, filtering out common noise like affiliations and metadata.
-2.  **Privacy-First**: Runs entirely locally; no data leaves your machine.
-3.  **Human-in-the-Loop**: The interactive mode allows you to refine the AI's output before finalizing the presentation.
-
+<div align="center">
+  <i>Built with ❤️ by Harsh Raj</i>
+</div>
