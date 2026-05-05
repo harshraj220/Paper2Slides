@@ -29,7 +29,7 @@ Narration:
     # Remove leading timestamps like "12:00 " or "[00:10] "
     text = re.sub(r"^\[?\d{1,2}:\d{2}(:\d{2})?\]?\s*", "", text)
     # Remove leading "Time: ..." or "Narration: ..."
-    text = re.sub(r"^(?i)(time|narration|speaker|slide \d+):\s*", "", text)
+    text = re.sub(r"(?i)^(time|narration|speaker|slide \d+):\s*", "", text)
 
     # 2. Remove chat fillers
     for prefix in ["Sure", "Okay", "Alright", "Here’s", "Here's", "In this slide", "This slide shows"]:
