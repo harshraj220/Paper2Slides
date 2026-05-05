@@ -25,7 +25,7 @@ def qwen_generate(prompt: str, max_tokens: int = 72, temperature: float = 0.1) -
     
     data = {
         # This specific model string uses OpenRouter's free tier
-        "model": "qwen/qwen-2.5-7b-instruct:free",
+        "model": "qwen/qwen3-next-80b-a3b-instruct:free",
         "messages": [
             {"role": "user", "content": prompt}
         ],
