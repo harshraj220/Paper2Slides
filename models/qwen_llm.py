@@ -36,9 +36,11 @@ def qwen_generate(prompt: str, max_tokens: int = 72, temperature: float = 0.1) -
     }
     
     import time
-    for attempt in range(3):
+    
+    # Increased attempts to handle strict free-tier rate limits
+    for attempt in range(5):
         try:
-            response = requests.post(url, headers=headers, json=data, timeout=30)
+            response = requests.post(url, headers=headers, json=data, timeout=45)
             response.raise_for_status()
             
             result = response.json()
@@ -57,10 +59,17 @@ def qwen_generate(prompt: str, max_tokens: int = 72, temperature: float = 0.1) -
             return text
         
         except Exception as e:
+            is_rate_limit = "429" in str(e)
             print(f"API Error (Attempt {attempt+1}): {e}")
             if 'response' in locals() and hasattr(response, 'text'):
                 print(f"Response: {response.text}")
-            if attempt == 2:
-                raise Exception(f"OpenRouter API failed after 3 attempts: {str(e)}")
-            time.sleep(2)
+                
+            if attempt == 4:
+                raise Exception(f"OpenRouter API failed after 5 attempts: {str(e)}")
+            
+            # Exponential backoff: 5s, 10s, 20s, 40s (longer for rate limits)
+            sleep_time = (2 ** attempt) * 5 if is_rate_limit else 3
+            print(f"Waiting {sleep_time} seconds before retrying...")
+            time.sleep(sleep_time)
+            
     return ""
