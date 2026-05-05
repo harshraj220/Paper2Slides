@@ -620,8 +620,8 @@ def summarize_section_with_qwen(section_title: str, section_text: str, target_bu
 
     prompt = f"""
 You are an expert research scientist assisting in creating a high-quality presentation.
-Your goal is to EXTRACT key technical details from the provided text into clear, standalone bullet points.
-Avoid generic summaries. Use specific details, numbers, and terminology from the text.
+Your goal is to SYNTHESIZE and EXTRACT key technical details from the provided text into clear, standalone bullet points.
+Avoid generic summaries. If this section is a continuation (e.g., 'Model (continued)'), focus on abstracting the broad themes and high-level concepts rather than copying repetitive raw text.
 
 SECTION: {section_title}
 TEXT:
@@ -629,16 +629,16 @@ TEXT:
 
 INSTRUCTIONS:
 1. Extract exactly {target_bullets + 2} distinct key points.
-2. Each bullet must be a COMPLETE sentence ending with a period.
-3. BE SPECIFIC: Include metrics, method names, and architectural details if present.
-4. MATH & TABLES: 
-   - If meaningful tables exist, extract their key insights as bullets.
-   - If important mathematical formulas exist, include them as readable text or simple LaTeX (e.g., "Loss L = ...") within a sentence.
-   - Ensure these are integrated naturally as bullet points.
+2. Each bullet must be a COMPLETE and COHERENT sentence ending with a period. It must make complete sense on its own.
+3. BE SPECIFIC BUT CONCEPTUAL: Include metrics and method names, but do not get bogged down in excessive low-level details.
+4. MATH & TABLES & NOISE: 
+   - Extract key insights from tables as text.
+   - STRONGLY IGNORE and DO NOT INCLUDE any garbled text, broken mathematical equations (e.g., 'V in q = .'), single variables, or random artifact symbols. 
+   - If a sentence seems cut off or meaningless, skip it completely.
 5. NO FILLER: Do not use "The paper discusses...", "This section shows...", etc. Start directly with the fact.
-6. NO HALLUCINATIONS: Only usage information present in the text.
+6. NO HALLUCINATIONS: Only use information present in the text.
 7. IGNORE citations (e.g. [12]), figures (e.g. Fig 1), and acknowledgments.
-8. FORMAT: Return a simple list where each line starts with "- ".
+8. FORMAT: Return a simple list where each line starts with "- ". Never use nested bullets.
 
 OUTPUT:
 """
