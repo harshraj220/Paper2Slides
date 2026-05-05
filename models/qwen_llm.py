@@ -40,9 +40,9 @@ def _lazy_load() -> None:
 
     _model = AutoModelForCausalLM.from_pretrained(
         MODEL_ID,
-        device_map="auto",
+        device_map="cuda:1",
         torch_dtype=torch.float16,
-        load_in_8bit=True,
+        load_in_4bit=True,
         trust_remote_code=True,
     )
 
@@ -80,6 +80,7 @@ def qwen_generate(prompt: str, max_tokens: int = 72, temperature: float = 0.1) -
         temperature=temperature,
         top_p=0.8,
         do_sample=True,
+        repetition_penalty=1.1,
         eos_token_id=model.config.eos_token_id,
     )
 

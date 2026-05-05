@@ -1,0 +1,177 @@
+{
+  "overall_scores": {
+    "structure_alignment_score": 0.88,
+    "semantic_fidelity_score": 0.62,
+    "lexical_overlap_score_rougel": 0.2346,
+    "overall_weighted_score": 0.6061,
+    "overall_classification": "Good",
+    "avg_narration_readability_grade": 16.36
+  },
+  "slide_classification_summary": {
+    "Good": 13,
+    "Average": 1,
+    "Poor": 2
+  },
+  "slide_details": [
+    {
+      "slide": "CEC-DuelNet: Relational Deep Reinforcement",
+      "match_type": "None",
+      "structure_score": 0.0,
+      "rouge_l": 0.0,
+      "semantic_sim": 0.0,
+      "weighted_score": 0.0,
+      "classification": "Poor",
+      "narration_readability": 19.58
+    },
+    {
+      "slide": "INTRODUCTION",
+      "match_type": "Exact",
+      "structure_score": 1.0,
+      "rouge_l": 0.1674,
+      "semantic_sim": 0.5926,
+      "weighted_score": 0.5908,
+      "classification": "Good",
+      "narration_readability": 17.98
+    },
+    {
+      "slide": "INTRODUCTION (continued)",
+      "match_type": "Exact",
+      "structure_score": 1.0,
+      "rouge_l": 0.0699,
+      "semantic_sim": 0.4081,
+      "weighted_score": 0.4335,
+      "classification": "Average",
+      "narration_readability": 17.66
+    },
+    {
+      "slide": "RELATED WORK",
+      "match_type": "Exact",
+      "structure_score": 1.0,
+      "rouge_l": 0.2272,
+      "semantic_sim": 0.7625,
+      "weighted_score": 0.7327,
+      "classification": "Good",
+      "narration_readability": 11.78
+    },
+    {
+      "slide": "Latency Model",
+      "match_type": "Exact",
+      "structure_score": 1.0,
+      "rouge_l": 0.4135,
+      "semantic_sim": 0.8238,
+      "weighted_score": 0.8004,
+      "classification": "Good",
+      "narration_readability": 13.59
+    },
+    {
+      "slide": "Latency Model (continued)",
+      "match_type": "Exact",
+      "structure_score": 1.0,
+      "rouge_l": 0.25,
+      "semantic_sim": 0.793,
+      "weighted_score": 0.7594,
+      "classification": "Good",
+      "narration_readability": 13.19
+    },
+    {
+      "slide": "Reward Function",
+      "match_type": "Fuzzy",
+      "structure_score": 1.0,
+      "rouge_l": 0.3826,
+      "semantic_sim": 0.7017,
+      "weighted_score": 0.6996,
+      "classification": "Good",
+      "narration_readability": 19.97
+    },
+    {
+      "slide": "Reward Function (continued)",
+      "match_type": "Fuzzy",
+      "structure_score": 1.0,
+      "rouge_l": 0.3684,
+      "semantic_sim": 0.8495,
+      "weighted_score": 0.8165,
+      "classification": "Good",
+      "narration_readability": 17.45
+    },
+    {
+      "slide": "Network Architecture",
+      "match_type": "Fuzzy",
+      "structure_score": 1.0,
+      "rouge_l": 0.1822,
+      "semantic_sim": 0.7467,
+      "weighted_score": 0.7156,
+      "classification": "Good",
+      "narration_readability": 16.11
+    },
+    {
+      "slide": "Network Architecture (continued)",
+      "match_type": "Fuzzy",
+      "structure_score": 1.0,
+      "rouge_l": 0.1486,
+      "semantic_sim": 0.5765,
+      "weighted_score": 0.5761,
+      "classification": "Good",
+      "narration_readability": 16.94
+    },
+    {
+      "slide": "EXPERIMENTAL SETUP AND RESULTS",
+      "match_type": "Exact",
+      "structure_score": 1.0,
+      "rouge_l": 0.4366,
+      "semantic_sim": 0.6736,
+      "weighted_score": 0.6825,
+      "classification": "Good",
+      "narration_readability": 15.3
+    },
+    {
+      "slide": "EXPERIMENTAL SETUP AND RESULTS (continued)",
+      "match_type": "Exact",
+      "structure_score": 1.0,
+      "rouge_l": 0.2609,
+      "semantic_sim": 0.7898,
+      "weighted_score": 0.758,
+      "classification": "Good",
+      "narration_readability": 18.2
+    },
+    {
+      "slide": "Results Analysis",
+      "match_type": "Exact",
+      "structure_score": 1.0,
+      "rouge_l": 0.2903,
+      "semantic_sim": 0.7833,
+      "weighted_score": 0.7557,
+      "classification": "Good",
+      "narration_readability": 16.14
+    },
+    {
+      "slide": "Results Analysis (continued)",
+      "match_type": "Exact",
+      "structure_score": 1.0,
+      "rouge_l": 0.0925,
+      "semantic_sim": 0.6651,
+      "weighted_score": 0.6413,
+      "classification": "Good",
+      "narration_readability": 15.01
+    },
+    {
+      "slide": "CONCLUSION",
+      "match_type": "Exact",
+      "structure_score": 1.0,
+      "rouge_l": 0.4636,
+      "semantic_sim": 0.7365,
+      "weighted_score": 0.7355,
+      "classification": "Good",
+      "narration_readability": 19.2
+    },
+    {
+      "slide": "Untitled",
+      "match_type": "None",
+      "structure_score": 0.0,
+      "rouge_l": 0.0,
+      "semantic_sim": 0.0,
+      "weighted_score": 0.0,
+      "classification": "Poor",
+      "narration_readability": 13.7
+    }
+  ]
+}

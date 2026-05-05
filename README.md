@@ -1,3 +1,4 @@
+# Paper2Slides
 
 # Paper2Slides
 
@@ -111,40 +112,73 @@ paper2slides/
 ├── ppt_narration_project/       # Module: Handles AI narration, TTS (EdgeTTS), and Audio Embedding
 │   ├── main.py
 │   ├── tts_generator.py         # High-quality Neural TTS generation
-│   └── ...
-├── paper2ppt_core/              # Utilities: Text cleaning and sectioning
-├── models/                      # AI Model Interfaces (Qwen, etc.)
-├── scripts/                     # Helper utilities and experimental scripts
-├── archive/                     # Deprecated or legacy scripts
-├── requirements.txt             # Dependency definitions
+### Step 6: Interactive Query & Update (New!)
+*   **Code**: `paper2slides.py` (Main Loop), `paper2ppt_cli.py` (Slide Matching)
+*   **Action**:
+    *   Once the initial presentation is built, the system enters an **Interactive Mode**.
+    *   It prompts you: `Type your query (or 'exit'/'quit' to finish):`.
+    *   You can ask questions (e.g., "Explain the methodology in more detail").
+    *   The system uses **Qwen-2.5** to find the relevant section, generate a detailed explanation, and convert it into presentation bullets.
+    *   If you approve the update, it **automatically updates the slides** and **regenerates the narration** for that section.
+    *   It handles **dynamic slide expansion**: if the new explanation is long, it splits the content into multiple slides.
+
+### Step 7: Final Assembly
+*   **Code**: `ppt_narration_project/ppt_audio_embedder.py`
+*   **Action**: It inserts the generated audio files onto the correct slides set to "Play in Background". It saves the final result as `<paper_name>_summary_with_narration.pptx`.
+
+---
+
+## 🛠️ Advanced Configuration
+
+### Excluding Sections/Affiliations
+The system uses a smart filter to ignore author lists and affiliations. This is configured in `paper2ppt_core/sections.py`. It currently filters out:
+*   Universities (e.g., "UC", "MIT", "Institute")
+*   Tech Companies (e.g., "Microsoft", "Google", "Meta")
+*   Addresses & Metadata ("Street", "Box", "Copyright")
+
+### Slide chunking
+*   Default limit per slide: **5 bullets**.
+*   If content exceeds this (e.g., detailed interactive updates), formatting is preserved by splitting across `Title` and `Title (continued)` slides.
+
+---
+
+## ❓ Troubleshooting
+
+**Q: The system hangs on "Using Qwen LLM for..."**
+*   **A**: This is the model generating text. On slower CPUs, this might take 1-2 minutes per section. Please be patient. We have optimized `max_tokens` to 512 to improve speed.
+
+**Q: My query isn't finding the right section.**
+*   **A**: Ensure your query uses keywords present in the paper (e.g., "Architecture" vs "Method"). The system uses semantic fuzzy matching, but specific terms help.
+
+**Q: The presentation has "Ghost" sections (e.g., References).**
+*   **A**: The section filtering logic usually catches these. If one slips through, you can list it in the `SKIP_SECTIONS` set in `paper2ppt_cli.py`.
+
+---
+
+## Project Structure
+
+```
+paper2slides/
+├── paper2slides.py              # Main Entry Point & Interactive Loop
+├── paper2ppt_cli.py             # Core Logic: Extraction, Filtering, & Slide Management
+├── ppt_narration_project/       # Module: Narration, TTS, audio embedding
+│   ├── main.py
+│   ├── narration_generator.py   # AI Script Writing (Qwen)
+│   ├── tts_generator.py         # Neural TTS (Edge-TTS)
+│   └── ppt_audio_embedder.py    # PowerPoint Audio Insertion
+├── paper2ppt_core/              # Utilities
+│   ├── sections.py              # Section detection & Header filtering
+│   ├── pptx_builder.py          # Slide layout engine
+│   └── io.py                    # PDF Reading & Image Extraction
+├── models/                      # AI Model Interfaces
+│   └── qwen_llm.py              # Local LLM wrapper
+├── requirements.txt
 └── README.md
 ```
 
-## clean & Readable Code
+## Design Principles
 
-This project adheres to key design principles:
-1.  **Modularity**: Each step (extraction, summarization, narration, audio) is a separate module.
-2.  **Clean Output**: Temporary files are managed safely; final output is a single, professional PPTX.
-3.  **High Quality Audio**: Uses `edge-tts` for natural-sounding narration.
+1.  **Generalization**: The pipeline is robust to different paper formats, filtering out common noise like affiliations and metadata.
+2.  **Privacy-First**: Runs entirely locally; no data leaves your machine.
+3.  **Human-in-the-Loop**: The interactive mode allows you to refine the AI's output before finalizing the presentation.
 
-
----
-
-## Notes
-
-* Narration is intentionally hidden to keep slides clean
-* Audio playback depends on PowerPoint or compatible viewers
-* Intermediate files may be generated internally and cleaned automatically
-
----
-
-## Use Cases
-
-* Academic presentations
-* Research paper reviews
-* Lecture material generation
-* Technical talk preparation
-
----
-
-````

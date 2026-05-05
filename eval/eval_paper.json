@@ -1,0 +1,177 @@
+{
+  "overall_scores": {
+    "structure_alignment_score": 0.88,
+    "semantic_fidelity_score": 0.56,
+    "lexical_overlap_score_rougel": 0.0631,
+    "overall_weighted_score": 0.5393,
+    "overall_classification": "Good",
+    "avg_narration_readability_grade": 17.3
+  },
+  "slide_classification_summary": {
+    "Good": 13,
+    "Average": 1,
+    "Poor": 2
+  },
+  "slide_details": [
+    {
+      "slide": "Autonomous Agents in Electric Vehicle Routing: A Stackelberg Game Framework with Reinforcement Learning and LLM-Based Station Pricing",
+      "match_type": "None",
+      "structure_score": 0.0,
+      "rouge_l": 0.0,
+      "semantic_sim": 0.0,
+      "weighted_score": 0.0,
+      "classification": "Poor",
+      "narration_readability": 24.99
+    },
+    {
+      "slide": "Abstract",
+      "match_type": "Exact",
+      "structure_score": 1.0,
+      "rouge_l": 0.1459,
+      "semantic_sim": 0.6465,
+      "weighted_score": 0.6318,
+      "classification": "Good",
+      "narration_readability": 18.17
+    },
+    {
+      "slide": "INTRODUCTION",
+      "match_type": "Exact",
+      "structure_score": 1.0,
+      "rouge_l": 0.0815,
+      "semantic_sim": 0.6815,
+      "weighted_score": 0.6533,
+      "classification": "Good",
+      "narration_readability": 18.2
+    },
+    {
+      "slide": "INTRODUCTION (continued)",
+      "match_type": "Exact",
+      "structure_score": 1.0,
+      "rouge_l": 0.063,
+      "semantic_sim": 0.6464,
+      "weighted_score": 0.6234,
+      "classification": "Good",
+      "narration_readability": 21.06
+    },
+    {
+      "slide": "RELATED WORK",
+      "match_type": "Exact",
+      "structure_score": 1.0,
+      "rouge_l": 0.0989,
+      "semantic_sim": 0.6742,
+      "weighted_score": 0.6493,
+      "classification": "Good",
+      "narration_readability": 13.05
+    },
+    {
+      "slide": "PROBLEM FORMULATION",
+      "match_type": "Fuzzy",
+      "structure_score": 1.0,
+      "rouge_l": 0.092,
+      "semantic_sim": 0.5225,
+      "weighted_score": 0.5272,
+      "classification": "Good",
+      "narration_readability": 11.17
+    },
+    {
+      "slide": "PROBLEM FORMULATION (continued)",
+      "match_type": "Fuzzy",
+      "structure_score": 1.0,
+      "rouge_l": 0.1412,
+      "semantic_sim": 0.6267,
+      "weighted_score": 0.6155,
+      "classification": "Good",
+      "narration_readability": 20.27
+    },
+    {
+      "slide": "PROBLEM FORMULATION (continued)",
+      "match_type": "Fuzzy",
+      "structure_score": 1.0,
+      "rouge_l": 0.0487,
+      "semantic_sim": 0.4761,
+      "weighted_score": 0.4857,
+      "classification": "Average",
+      "narration_readability": 17.72
+    },
+    {
+      "slide": "ALGORITHMS",
+      "match_type": "Fuzzy",
+      "structure_score": 1.0,
+      "rouge_l": 0.091,
+      "semantic_sim": 0.6193,
+      "weighted_score": 0.6045,
+      "classification": "Good",
+      "narration_readability": 19.56
+    },
+    {
+      "slide": "ALGORITHMS (continued)",
+      "match_type": "Fuzzy",
+      "structure_score": 1.0,
+      "rouge_l": 0.0446,
+      "semantic_sim": 0.6159,
+      "weighted_score": 0.5972,
+      "classification": "Good",
+      "narration_readability": 20.9
+    },
+    {
+      "slide": "ALGORITHMS (continued)",
+      "match_type": "Fuzzy",
+      "structure_score": 1.0,
+      "rouge_l": 0.0737,
+      "semantic_sim": 0.5912,
+      "weighted_score": 0.5803,
+      "classification": "Good",
+      "narration_readability": 13.01
+    },
+    {
+      "slide": "EXPERIMENTS",
+      "match_type": "Exact",
+      "structure_score": 1.0,
+      "rouge_l": 0.0264,
+      "semantic_sim": 0.7545,
+      "weighted_score": 0.7062,
+      "classification": "Good",
+      "narration_readability": 16.72
+    },
+    {
+      "slide": "EXPERIMENTS (continued)",
+      "match_type": "Exact",
+      "structure_score": 1.0,
+      "rouge_l": 0.0244,
+      "semantic_sim": 0.6497,
+      "weighted_score": 0.6222,
+      "classification": "Good",
+      "narration_readability": 17.05
+    },
+    {
+      "slide": "EXPERIMENTS (continued)",
+      "match_type": "Exact",
+      "structure_score": 1.0,
+      "rouge_l": 0.0202,
+      "semantic_sim": 0.6833,
+      "weighted_score": 0.6487,
+      "classification": "Good",
+      "narration_readability": 12.35
+    },
+    {
+      "slide": "CONCLUSION",
+      "match_type": "Exact",
+      "structure_score": 1.0,
+      "rouge_l": 0.0587,
+      "semantic_sim": 0.7218,
+      "weighted_score": 0.6833,
+      "classification": "Good",
+      "narration_readability": 18.91
+    },
+    {
+      "slide": "Untitled",
+      "match_type": "None",
+      "structure_score": 0.0,
+      "rouge_l": 0.0,
+      "semantic_sim": 0.0,
+      "weighted_score": 0.0,
+      "classification": "Poor",
+      "narration_readability": 13.7
+    }
+  ]
+}

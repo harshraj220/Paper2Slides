@@ -1,0 +1,52 @@
+{
+  "overall_scores": {
+    "structure_alignment_score": 0.5,
+    "semantic_fidelity_score": 0.03,
+    "lexical_overlap_score_rougel": 0.0161,
+    "avg_narration_readability_grade": 17.7
+  },
+  "slide_details": [
+    {
+      "slide": "- Fast Bullet 1 - Fast Bullet 2 - Fast Bullet 3 - Fast Bullet 4 - Fast Bullet 5 - Fast Bullet 6 - Fast Bullet 7 - Fast Bullet 8",
+      "match_type": "None",
+      "rouge_l": 0.0,
+      "semantic_sim": 0.0,
+      "narration_readability": 21.82
+    },
+    {
+      "slide": "INTRODUCTION",
+      "match_type": "Exact",
+      "rouge_l": 0.0162,
+      "semantic_sim": -0.0129,
+      "narration_readability": 21.33
+    },
+    {
+      "slide": "INTRODUCTION (continued)",
+      "match_type": "Exact",
+      "rouge_l": 0.0122,
+      "semantic_sim": -0.0167,
+      "narration_readability": 18.05
+    },
+    {
+      "slide": "Another interesting use case is when using the",
+      "match_type": "None",
+      "rouge_l": 0.0,
+      "semantic_sim": 0.0,
+      "narration_readability": 19.06
+    },
+    {
+      "slide": "CONCLUSION",
+      "match_type": "Exact",
+      "rouge_l": 0.0682,
+      "semantic_sim": 0.1912,
+      "narration_readability": 9.34
+    },
+    {
+      "slide": "Untitled",
+      "match_type": "None",
+      "rouge_l": 0.0,
+      "semantic_sim": 0.0,
+      "narration_readability": 16.62
+    }
+  ]
+}

@@ -1,0 +1,247 @@
+{
+  "overall_scores": {
+    "structure_alignment_score": 0.91,
+    "semantic_fidelity_score": 0.62,
+    "lexical_overlap_score_rougel": 0.1196,
+    "overall_weighted_score": 0.5966,
+    "overall_classification": "Good",
+    "avg_narration_readability_grade": 16.3
+  },
+  "slide_classification_summary": {
+    "Good": 15,
+    "Average": 6,
+    "Poor": 2
+  },
+  "slide_details": [
+    {
+      "slide": "Machine Learning in Artificial Intelligence: Towards a Common Understanding",
+      "match_type": "None",
+      "structure_score": 0.0,
+      "rouge_l": 0.0,
+      "semantic_sim": 0.0,
+      "weighted_score": 0.0,
+      "classification": "Poor",
+      "narration_readability": 13.87
+    },
+    {
+      "slide": "Abstract",
+      "match_type": "Exact",
+      "structure_score": 1.0,
+      "rouge_l": 0.3766,
+      "semantic_sim": 0.8342,
+      "weighted_score": 0.805,
+      "classification": "Good",
+      "narration_readability": 17.21
+    },
+    {
+      "slide": "1. Introduction",
+      "match_type": "Exact",
+      "structure_score": 1.0,
+      "rouge_l": 0.0344,
+      "semantic_sim": 0.4344,
+      "weighted_score": 0.451,
+      "classification": "Average",
+      "narration_readability": 16.0
+    },
+    {
+      "slide": "2.1. Terminology",
+      "match_type": "Fuzzy",
+      "structure_score": 1.0,
+      "rouge_l": 0.112,
+      "semantic_sim": 0.7315,
+      "weighted_score": 0.6964,
+      "classification": "Good",
+      "narration_readability": 18.94
+    },
+    {
+      "slide": "2.1. Terminology (continued)",
+      "match_type": "Fuzzy",
+      "structure_score": 1.0,
+      "rouge_l": 0.0857,
+      "semantic_sim": 0.747,
+      "weighted_score": 0.7062,
+      "classification": "Good",
+      "narration_readability": 15.92
+    },
+    {
+      "slide": "2.2. Machine learning",
+      "match_type": "Fuzzy",
+      "structure_score": 1.0,
+      "rouge_l": 0.2169,
+      "semantic_sim": 0.7481,
+      "weighted_score": 0.7202,
+      "classification": "Good",
+      "narration_readability": 12.31
+    },
+    {
+      "slide": "2.2. Machine learning (continued)",
+      "match_type": "Fuzzy",
+      "structure_score": 1.0,
+      "rouge_l": 0.1413,
+      "semantic_sim": 0.7326,
+      "weighted_score": 0.7002,
+      "classification": "Good",
+      "narration_readability": 14.09
+    },
+    {
+      "slide": "model",
+      "match_type": "Exact",
+      "structure_score": 1.0,
+      "rouge_l": 0.3284,
+      "semantic_sim": 0.835,
+      "weighted_score": 0.8009,
+      "classification": "Good",
+      "narration_readability": 18.0
+    },
+    {
+      "slide": "2.3. Artificial intelligence",
+      "match_type": "Fuzzy",
+      "structure_score": 1.0,
+      "rouge_l": 0.0682,
+      "semantic_sim": 0.7584,
+      "weighted_score": 0.7135,
+      "classification": "Good",
+      "narration_readability": 16.39
+    },
+    {
+      "slide": "2.3. Artificial intelligence (continued)",
+      "match_type": "Fuzzy",
+      "structure_score": 1.0,
+      "rouge_l": 0.0393,
+      "semantic_sim": 0.7364,
+      "weighted_score": 0.693,
+      "classification": "Good",
+      "narration_readability": 18.34
+    },
+    {
+      "slide": "3.1. Layers of agents",
+      "match_type": "Fuzzy",
+      "structure_score": 1.0,
+      "rouge_l": 0.1576,
+      "semantic_sim": 0.7707,
+      "weighted_score": 0.7324,
+      "classification": "Good",
+      "narration_readability": 17.05
+    },
+    {
+      "slide": "3.1. Layers of agents (continued)",
+      "match_type": "Fuzzy",
+      "structure_score": 1.0,
+      "rouge_l": 0.1318,
+      "semantic_sim": 0.7446,
+      "weighted_score": 0.7089,
+      "classification": "Good",
+      "narration_readability": 9.18
+    },
+    {
+      "slide": "3.2. Types of learning",
+      "match_type": "Fuzzy",
+      "structure_score": 1.0,
+      "rouge_l": 0.148,
+      "semantic_sim": 0.6955,
+      "weighted_score": 0.6712,
+      "classification": "Good",
+      "narration_readability": 16.52
+    },
+    {
+      "slide": "3.2. Types of learning (continued)",
+      "match_type": "Fuzzy",
+      "structure_score": 1.0,
+      "rouge_l": 0.0882,
+      "semantic_sim": 0.7095,
+      "weighted_score": 0.6764,
+      "classification": "Good",
+      "narration_readability": 16.79
+    },
+    {
+      "slide": "3.3. Continuum between human involvement",
+      "match_type": "Fuzzy",
+      "structure_score": 1.0,
+      "rouge_l": 0.1404,
+      "semantic_sim": 0.784,
+      "weighted_score": 0.7412,
+      "classification": "Good",
+      "narration_readability": 17.04
+    },
+    {
+      "slide": "3.3. Continuum between human involvement (continued)",
+      "match_type": "Fuzzy",
+      "structure_score": 1.0,
+      "rouge_l": 0.0827,
+      "semantic_sim": 0.7488,
+      "weighted_score": 0.7073,
+      "classification": "Good",
+      "narration_readability": 12.81
+    },
+    {
+      "slide": "5. Conclusion",
+      "match_type": "Exact",
+      "structure_score": 1.0,
+      "rouge_l": 0.3033,
+      "semantic_sim": 0.8299,
+      "weighted_score": 0.7943,
+      "classification": "Good",
+      "narration_readability": 14.05
+    },
+    {
+      "slide": "Introduction",
+      "match_type": "Exact",
+      "structure_score": 1.0,
+      "rouge_l": 0.054,
+      "semantic_sim": 0.4765,
+      "weighted_score": 0.4866,
+      "classification": "Average",
+      "narration_readability": 21.87
+    },
+    {
+      "slide": "Introduction (continued)",
+      "match_type": "Exact",
+      "structure_score": 1.0,
+      "rouge_l": 0.0637,
+      "semantic_sim": 0.4801,
+      "weighted_score": 0.4905,
+      "classification": "Average",
+      "narration_readability": 18.53
+    },
+    {
+      "slide": "Introduction (continued)",
+      "match_type": "Exact",
+      "structure_score": 1.0,
+      "rouge_l": 0.0609,
+      "semantic_sim": 0.4621,
+      "weighted_score": 0.4758,
+      "classification": "Average",
+      "narration_readability": 18.78
+    },
+    {
+      "slide": "Introduction (continued)",
+      "match_type": "Exact",
+      "structure_score": 1.0,
+      "rouge_l": 0.0581,
+      "semantic_sim": 0.4695,
+      "weighted_score": 0.4814,
+      "classification": "Average",
+      "narration_readability": 18.1
+    },
+    {
+      "slide": "Introduction (continued)",
+      "match_type": "Exact",
+      "structure_score": 1.0,
+      "rouge_l": 0.0582,
+      "semantic_sim": 0.4533,
+      "weighted_score": 0.4685,
+      "classification": "Average",
+      "narration_readability": 19.15
+    },
+    {
+      "slide": "Untitled",
+      "match_type": "None",
+      "structure_score": 0.0,
+      "rouge_l": 0.0,
+      "semantic_sim": 0.0,
+      "weighted_score": 0.0,
+      "classification": "Poor",
+      "narration_readability": 14.1
+    }
+  ]
+}

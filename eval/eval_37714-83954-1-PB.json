@@ -1,0 +1,87 @@
+{
+  "overall_scores": {
+    "structure_alignment_score": 0.71,
+    "semantic_fidelity_score": 0.46,
+    "lexical_overlap_score_rougel": 0.0736,
+    "overall_weighted_score": 0.4453,
+    "overall_classification": "Average",
+    "avg_narration_readability_grade": 17.8
+  },
+  "slide_classification_summary": {
+    "Good": 3,
+    "Average": 2,
+    "Poor": 2
+  },
+  "slide_details": [
+    {
+      "slide": "Detection of diabetic retinopathy and classification of its stages by using convolutional neural network",
+      "match_type": "None",
+      "structure_score": 0.0,
+      "rouge_l": 0.0,
+      "semantic_sim": 0.0,
+      "weighted_score": 0.0,
+      "classification": "Poor",
+      "narration_readability": 22.04
+    },
+    {
+      "slide": "ABSTRACT",
+      "match_type": "Exact",
+      "structure_score": 1.0,
+      "rouge_l": 0.0984,
+      "semantic_sim": 0.8746,
+      "weighted_score": 0.8096,
+      "classification": "Good",
+      "narration_readability": 22.53
+    },
+    {
+      "slide": "INTRODUCTION",
+      "match_type": "Exact",
+      "structure_score": 1.0,
+      "rouge_l": 0.0469,
+      "semantic_sim": 0.4879,
+      "weighted_score": 0.495,
+      "classification": "Average",
+      "narration_readability": 13.25
+    },
+    {
+      "slide": "METHOD",
+      "match_type": "Exact",
+      "structure_score": 1.0,
+      "rouge_l": 0.0541,
+      "semantic_sim": 0.5945,
+      "weighted_score": 0.581,
+      "classification": "Good",
+      "narration_readability": 16.29
+    },
+    {
+      "slide": "Model",
+      "match_type": "Exact",
+      "structure_score": 1.0,
+      "rouge_l": 0.1229,
+      "semantic_sim": 0.4658,
+      "weighted_score": 0.4849,
+      "classification": "Average",
+      "narration_readability": 17.01
+    },
+    {
+      "slide": "CONCLUSION",
+      "match_type": "Exact",
+      "structure_score": 1.0,
+      "rouge_l": 0.1931,
+      "semantic_sim": 0.7843,
+      "weighted_score": 0.7468,
+      "classification": "Good",
+      "narration_readability": 19.77
+    },
+    {
+      "slide": "Untitled",
+      "match_type": "None",
+      "structure_score": 0.0,
+      "rouge_l": 0.0,
+      "semantic_sim": 0.0,
+      "weighted_score": 0.0,
+      "classification": "Poor",
+      "narration_readability": 13.7
+    }
+  ]
+}

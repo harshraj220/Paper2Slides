@@ -1,0 +1,417 @@
+{
+  "overall_scores": {
+    "structure_alignment_score": 0.95,
+    "semantic_fidelity_score": 0.55,
+    "lexical_overlap_score_rougel": 0.1343,
+    "overall_weighted_score": 0.55,
+    "overall_classification": "Good",
+    "avg_narration_readability_grade": 16.68
+  },
+  "slide_classification_summary": {
+    "Good": 27,
+    "Average": 10,
+    "Poor": 3
+  },
+  "slide_details": [
+    {
+      "slide": "Inverse Reinforcement Learning With Graph Neural Networks for Full-Dimensional Task Offloading in Edge Computing",
+      "match_type": "None",
+      "structure_score": 0.0,
+      "rouge_l": 0.0,
+      "semantic_sim": 0.0,
+      "weighted_score": 0.0,
+      "classification": "Poor",
+      "narration_readability": 20.5
+    },
+    {
+      "slide": "I. INTRODUCTION",
+      "match_type": "Exact",
+      "structure_score": 1.0,
+      "rouge_l": 0.0609,
+      "semantic_sim": 0.4827,
+      "weighted_score": 0.4923,
+      "classification": "Average",
+      "narration_readability": 13.87
+    },
+    {
+      "slide": "B. Solutions to MINLP Problems",
+      "match_type": "Fuzzy",
+      "structure_score": 1.0,
+      "rouge_l": 0.1651,
+      "semantic_sim": 0.696,
+      "weighted_score": 0.6733,
+      "classification": "Good",
+      "narration_readability": 10.82
+    },
+    {
+      "slide": "B. Solutions to MINLP Problems (continued)",
+      "match_type": "Fuzzy",
+      "structure_score": 1.0,
+      "rouge_l": 0.1026,
+      "semantic_sim": 0.5221,
+      "weighted_score": 0.528,
+      "classification": "Good",
+      "narration_readability": 15.25
+    },
+    {
+      "slide": "C. Contribution",
+      "match_type": "Fuzzy",
+      "structure_score": 1.0,
+      "rouge_l": 0.1571,
+      "semantic_sim": 0.6939,
+      "weighted_score": 0.6708,
+      "classification": "Good",
+      "narration_readability": 21.76
+    },
+    {
+      "slide": "C. Contribution (continued)",
+      "match_type": "Fuzzy",
+      "structure_score": 1.0,
+      "rouge_l": 0.1381,
+      "semantic_sim": 0.6682,
+      "weighted_score": 0.6484,
+      "classification": "Good",
+      "narration_readability": 15.43
+    },
+    {
+      "slide": "D. Related Work",
+      "match_type": "Exact",
+      "structure_score": 1.0,
+      "rouge_l": 0.1467,
+      "semantic_sim": 0.6905,
+      "weighted_score": 0.667,
+      "classification": "Good",
+      "narration_readability": 21.4
+    },
+    {
+      "slide": "E. Organization",
+      "match_type": "Fuzzy",
+      "structure_score": 1.0,
+      "rouge_l": 0.3051,
+      "semantic_sim": 0.7352,
+      "weighted_score": 0.7187,
+      "classification": "Good",
+      "narration_readability": 16.59
+    },
+    {
+      "slide": "E. Organization (continued)",
+      "match_type": "Fuzzy",
+      "structure_score": 1.0,
+      "rouge_l": 0.2128,
+      "semantic_sim": 0.2981,
+      "weighted_score": 0.3597,
+      "classification": "Average",
+      "narration_readability": 17.73
+    },
+    {
+      "slide": "A. System Model",
+      "match_type": "Exact",
+      "structure_score": 1.0,
+      "rouge_l": 0.08,
+      "semantic_sim": 0.3023,
+      "weighted_score": 0.3498,
+      "classification": "Average",
+      "narration_readability": 14.63
+    },
+    {
+      "slide": "B. Communication Model",
+      "match_type": "Exact",
+      "structure_score": 1.0,
+      "rouge_l": 0.0475,
+      "semantic_sim": 0.1901,
+      "weighted_score": 0.2568,
+      "classification": "Poor",
+      "narration_readability": 14.43
+    },
+    {
+      "slide": "C. Computation Model",
+      "match_type": "Exact",
+      "structure_score": 1.0,
+      "rouge_l": 0.007,
+      "semantic_sim": 0.3068,
+      "weighted_score": 0.3461,
+      "classification": "Average",
+      "narration_readability": 18.6
+    },
+    {
+      "slide": "D. Problem Formulation",
+      "match_type": "Fuzzy",
+      "structure_score": 1.0,
+      "rouge_l": 0.0247,
+      "semantic_sim": 0.4507,
+      "weighted_score": 0.463,
+      "classification": "Average",
+      "narration_readability": 18.7
+    },
+    {
+      "slide": "D. Problem Formulation (continued)",
+      "match_type": "Fuzzy",
+      "structure_score": 1.0,
+      "rouge_l": 0.0166,
+      "semantic_sim": 0.4012,
+      "weighted_score": 0.4226,
+      "classification": "Average",
+      "narration_readability": 15.92
+    },
+    {
+      "slide": "B. Variable Selection Policy",
+      "match_type": "Fuzzy",
+      "structure_score": 1.0,
+      "rouge_l": 0.2337,
+      "semantic_sim": 0.5995,
+      "weighted_score": 0.603,
+      "classification": "Good",
+      "narration_readability": 17.26
+    },
+    {
+      "slide": "B. Variable Selection Policy (continued)",
+      "match_type": "Fuzzy",
+      "structure_score": 1.0,
+      "rouge_l": 0.147,
+      "semantic_sim": 0.7157,
+      "weighted_score": 0.6873,
+      "classification": "Good",
+      "narration_readability": 18.08
+    },
+    {
+      "slide": "A. Motivation",
+      "match_type": "Fuzzy",
+      "structure_score": 1.0,
+      "rouge_l": 0.4834,
+      "semantic_sim": 0.9249,
+      "weighted_score": 0.8883,
+      "classification": "Good",
+      "narration_readability": 14.93
+    },
+    {
+      "slide": "A. Motivation (continued)",
+      "match_type": "Fuzzy",
+      "structure_score": 1.0,
+      "rouge_l": 0.25,
+      "semantic_sim": 0.7589,
+      "weighted_score": 0.7321,
+      "classification": "Good",
+      "narration_readability": 16.2
+    },
+    {
+      "slide": "B. Markov Decision Process",
+      "match_type": "Fuzzy",
+      "structure_score": 1.0,
+      "rouge_l": 0.1629,
+      "semantic_sim": 0.5401,
+      "weighted_score": 0.5483,
+      "classification": "Good",
+      "narration_readability": 15.71
+    },
+    {
+      "slide": "B. Markov Decision Process (continued)",
+      "match_type": "Fuzzy",
+      "structure_score": 1.0,
+      "rouge_l": 0.1208,
+      "semantic_sim": 0.4348,
+      "weighted_score": 0.4599,
+      "classification": "Average",
+      "narration_readability": 15.3
+    },
+    {
+      "slide": "C. The Framework of the GIRL",
+      "match_type": "Fuzzy",
+      "structure_score": 1.0,
+      "rouge_l": 0.0357,
+      "semantic_sim": 0.6415,
+      "weighted_score": 0.6168,
+      "classification": "Good",
+      "narration_readability": 15.85
+    },
+    {
+      "slide": "C. The Framework of the GIRL (continued)",
+      "match_type": "Fuzzy",
+      "structure_score": 1.0,
+      "rouge_l": 0.0204,
+      "semantic_sim": 0.5313,
+      "weighted_score": 0.5271,
+      "classification": "Good",
+      "narration_readability": 13.8
+    },
+    {
+      "slide": "V. THE PROPOSED GRAPH NEURAL NETWORK",
+      "match_type": "Fuzzy",
+      "structure_score": 1.0,
+      "rouge_l": 0.1718,
+      "semantic_sim": 0.7229,
+      "weighted_score": 0.6955,
+      "classification": "Good",
+      "narration_readability": 17.81
+    },
+    {
+      "slide": "V. THE PROPOSED GRAPH NEURAL NETWORK (continued)",
+      "match_type": "Fuzzy",
+      "structure_score": 1.0,
+      "rouge_l": 0.1522,
+      "semantic_sim": 0.7439,
+      "weighted_score": 0.7103,
+      "classification": "Good",
+      "narration_readability": 19.14
+    },
+    {
+      "slide": "A. State Encoding Module",
+      "match_type": "Fuzzy",
+      "structure_score": 1.0,
+      "rouge_l": 0.1383,
+      "semantic_sim": 0.605,
+      "weighted_score": 0.5979,
+      "classification": "Good",
+      "narration_readability": 17.68
+    },
+    {
+      "slide": "A. State Encoding Module (continued)",
+      "match_type": "Fuzzy",
+      "structure_score": 1.0,
+      "rouge_l": 0.1337,
+      "semantic_sim": 0.6467,
+      "weighted_score": 0.6307,
+      "classification": "Good",
+      "narration_readability": 19.72
+    },
+    {
+      "slide": "B. Feature Embedding Module",
+      "match_type": "Fuzzy",
+      "structure_score": 1.0,
+      "rouge_l": 0.1528,
+      "semantic_sim": 0.6684,
+      "weighted_score": 0.65,
+      "classification": "Good",
+      "narration_readability": 15.33
+    },
+    {
+      "slide": "B. Feature Embedding Module (continued)",
+      "match_type": "Fuzzy",
+      "structure_score": 1.0,
+      "rouge_l": 0.1413,
+      "semantic_sim": 0.5512,
+      "weighted_score": 0.5551,
+      "classification": "Good",
+      "narration_readability": 16.7
+    },
+    {
+      "slide": "C. Graph Convolution Module",
+      "match_type": "Fuzzy",
+      "structure_score": 1.0,
+      "rouge_l": 0.2556,
+      "semantic_sim": 0.7646,
+      "weighted_score": 0.7373,
+      "classification": "Good",
+      "narration_readability": 16.56
+    },
+    {
+      "slide": "D. Attention GRU Module",
+      "match_type": "Fuzzy",
+      "structure_score": 1.0,
+      "rouge_l": 0.0714,
+      "semantic_sim": 0.7203,
+      "weighted_score": 0.6834,
+      "classification": "Good",
+      "narration_readability": 21.02
+    },
+    {
+      "slide": "D. Attention GRU Module (continued)",
+      "match_type": "Fuzzy",
+      "structure_score": 1.0,
+      "rouge_l": 0.0857,
+      "semantic_sim": 0.6977,
+      "weighted_score": 0.6667,
+      "classification": "Good",
+      "narration_readability": 15.92
+    },
+    {
+      "slide": "A. Model Generalization",
+      "match_type": "Exact",
+      "structure_score": 1.0,
+      "rouge_l": 0.094,
+      "semantic_sim": 0.7873,
+      "weighted_score": 0.7393,
+      "classification": "Good",
+      "narration_readability": 17.29
+    },
+    {
+      "slide": "B. Performance Optimization",
+      "match_type": "Fuzzy",
+      "structure_score": 1.0,
+      "rouge_l": 0.1685,
+      "semantic_sim": 0.5275,
+      "weighted_score": 0.5388,
+      "classification": "Good",
+      "narration_readability": 17.68
+    },
+    {
+      "slide": "C. Computational Complexity Analysis",
+      "match_type": "Exact",
+      "structure_score": 1.0,
+      "rouge_l": 0.0349,
+      "semantic_sim": 0.4304,
+      "weighted_score": 0.4478,
+      "classification": "Average",
+      "narration_readability": 16.14
+    },
+    {
+      "slide": "A. Experimental Setting",
+      "match_type": "Exact",
+      "structure_score": 1.0,
+      "rouge_l": 0.378,
+      "semantic_sim": 0.5955,
+      "weighted_score": 0.6142,
+      "classification": "Good",
+      "narration_readability": 15.17
+    },
+    {
+      "slide": "B. Policies for Comparison and Performance Metrics",
+      "match_type": "Fuzzy",
+      "structure_score": 1.0,
+      "rouge_l": 0.1074,
+      "semantic_sim": 0.4442,
+      "weighted_score": 0.4661,
+      "classification": "Average",
+      "narration_readability": 15.88
+    },
+    {
+      "slide": "B. Policies for Comparison and Performance Metrics (continued)",
+      "match_type": "Fuzzy",
+      "structure_score": 1.0,
+      "rouge_l": 0.0916,
+      "semantic_sim": 0.3949,
+      "weighted_score": 0.4251,
+      "classification": "Average",
+      "narration_readability": 15.73
+    },
+    {
+      "slide": "C. Simulation Results",
+      "match_type": "Exact",
+      "structure_score": 1.0,
+      "rouge_l": 0.0558,
+      "semantic_sim": 0.5245,
+      "weighted_score": 0.5252,
+      "classification": "Good",
+      "narration_readability": 16.34
+    },
+    {
+      "slide": "VIII. CONCLUSION",
+      "match_type": "Exact",
+      "structure_score": 1.0,
+      "rouge_l": 0.2203,
+      "semantic_sim": 0.6684,
+      "weighted_score": 0.6568,
+      "classification": "Good",
+      "narration_readability": 16.4
+    },
+    {
+      "slide": "Untitled",
+      "match_type": "None",
+      "structure_score": 0.0,
+      "rouge_l": 0.0,
+      "semantic_sim": 0.0,
+      "weighted_score": 0.0,
+      "classification": "Poor",
+      "narration_readability": 14.1
+    }
+  ]
+}

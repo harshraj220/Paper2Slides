@@ -1,0 +1,147 @@
+{
+  "overall_scores": {
+    "structure_alignment_score": 0.85,
+    "semantic_fidelity_score": 0.5,
+    "lexical_overlap_score_rougel": 0.0801,
+    "overall_weighted_score": 0.4915,
+    "overall_classification": "Average",
+    "avg_narration_readability_grade": 17.61
+  },
+  "slide_classification_summary": {
+    "Good": 8,
+    "Average": 3,
+    "Poor": 2
+  },
+  "slide_details": [
+    {
+      "slide": "Attention Is All You Need",
+      "match_type": "None",
+      "structure_score": 0.0,
+      "rouge_l": 0.0,
+      "semantic_sim": 0.0,
+      "weighted_score": 0.0,
+      "classification": "Poor",
+      "narration_readability": 17.39
+    },
+    {
+      "slide": "Abstract",
+      "match_type": "Exact",
+      "structure_score": 1.0,
+      "rouge_l": 0.0863,
+      "semantic_sim": 0.658,
+      "weighted_score": 0.635,
+      "classification": "Good",
+      "narration_readability": 18.42
+    },
+    {
+      "slide": "Introduction",
+      "match_type": "Exact",
+      "structure_score": 1.0,
+      "rouge_l": 0.2043,
+      "semantic_sim": 0.7438,
+      "weighted_score": 0.7154,
+      "classification": "Good",
+      "narration_readability": 21.92
+    },
+    {
+      "slide": "Introduction (continued)",
+      "match_type": "Exact",
+      "structure_score": 1.0,
+      "rouge_l": 0.094,
+      "semantic_sim": 0.7169,
+      "weighted_score": 0.683,
+      "classification": "Good",
+      "narration_readability": 17.69
+    },
+    {
+      "slide": "Background",
+      "match_type": "Exact",
+      "structure_score": 1.0,
+      "rouge_l": 0.0297,
+      "semantic_sim": 0.7226,
+      "weighted_score": 0.6811,
+      "classification": "Good",
+      "narration_readability": 18.51
+    },
+    {
+      "slide": "Background (continued)",
+      "match_type": "Exact",
+      "structure_score": 1.0,
+      "rouge_l": 0.0319,
+      "semantic_sim": 0.6783,
+      "weighted_score": 0.6458,
+      "classification": "Good",
+      "narration_readability": 19.71
+    },
+    {
+      "slide": "Model",
+      "match_type": "Exact",
+      "structure_score": 1.0,
+      "rouge_l": 0.0526,
+      "semantic_sim": 0.3738,
+      "weighted_score": 0.4043,
+      "classification": "Average",
+      "narration_readability": 20.57
+    },
+    {
+      "slide": "Results",
+      "match_type": "Exact",
+      "structure_score": 1.0,
+      "rouge_l": 0.1596,
+      "semantic_sim": 0.5884,
+      "weighted_score": 0.5867,
+      "classification": "Good",
+      "narration_readability": 11.72
+    },
+    {
+      "slide": "Results (continued)",
+      "match_type": "Exact",
+      "structure_score": 1.0,
+      "rouge_l": 0.1358,
+      "semantic_sim": 0.3298,
+      "weighted_score": 0.3774,
+      "classification": "Average",
+      "narration_readability": 9.79
+    },
+    {
+      "slide": "dmodel",
+      "match_type": "Exact",
+      "structure_score": 1.0,
+      "rouge_l": 0.0556,
+      "semantic_sim": 0.549,
+      "weighted_score": 0.5447,
+      "classification": "Good",
+      "narration_readability": 18.76
+    },
+    {
+      "slide": "dmodel (continued)",
+      "match_type": "Exact",
+      "structure_score": 1.0,
+      "rouge_l": 0.0442,
+      "semantic_sim": 0.4125,
+      "weighted_score": 0.4344,
+      "classification": "Average",
+      "narration_readability": 21.8
+    },
+    {
+      "slide": "Conclusion",
+      "match_type": "Exact",
+      "structure_score": 1.0,
+      "rouge_l": 0.1478,
+      "semantic_sim": 0.7094,
+      "weighted_score": 0.6823,
+      "classification": "Good",
+      "narration_readability": 19.01
+    },
+    {
+      "slide": "Untitled",
+      "match_type": "None",
+      "structure_score": 0.0,
+      "rouge_l": 0.0,
+      "semantic_sim": 0.0,
+      "weighted_score": 0.0,
+      "classification": "Poor",
+      "narration_readability": 13.7
+    }
+  ]
+}

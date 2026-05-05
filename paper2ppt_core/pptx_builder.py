@@ -13,6 +13,17 @@ import os
 # THEME & CONSTANTS
 # =========================
 
+import traceback
+try:
+    from .latex_utils import parse_mixed_content
+except ImportError:
+    # Fallback if running standalone
+    try:
+        from latex_utils import parse_mixed_content
+    except:
+        print("[WARN] latex_utils not found. Math rendering disabled.")
+        def parse_mixed_content(t): return [(t, {})]
+
 DEFAULT_THEME = {
     "title_font": "Calibri",
     "body_font": "Calibri",
@@ -28,7 +39,7 @@ DEFAULT_THEME = {
 
 MAX_FIGURES_PER_SLIDE = 2
 MAX_VISIBLE_BULLETS = 4
-MAX_BULLET_CHARS = 140
+MAX_BULLET_CHARS = 1000  # Increased from 140 to prevent truncation
 
 # =========================
 # UTILS
@@ -156,20 +167,36 @@ def add_bullets(slide, prs, bullets, has_images, theme):
     tf.word_wrap = True
     tf.auto_size = MSO_AUTO_SIZE.TEXT_TO_FIT_SHAPE
 
-    for i, b in enumerate(bullets[:MAX_VISIBLE_BULLETS]):
+    for i, b in enumerate(bullets):
         if not b:
             continue
 
-        # Safety truncation
-        if len(b) > MAX_BULLET_CHARS:
-            b = b[:MAX_BULLET_CHARS - 1] + "…"
+    # Parse and add formatted text runs
+        try:
+            segments = parse_mixed_content(b)
+        except Exception as e:
+            print(f"[WARN] Math parsing failed for bullet: {e}")
+            segments = [(b, {})]
 
         p = tf.add_paragraph() if i > 0 else tf.paragraphs[0]
-        p.text = b
         p.level = 0
-        p.font.size = Pt(theme["body_size_pt"])
-        p.font.color.rgb = rgb(theme["text_color"])
         p.space_after = Pt(12)
+
+        for text_seg, style in segments:
+            if not text_seg: continue
+            
+            run = p.add_run()
+            run.text = text_seg
+            run.font.size = Pt(theme["body_size_pt"])
+            run.font.color.rgb = rgb(theme["text_color"])
+            
+            # Apply styles
+            if style.get("subscript"):
+                run.font.subscript = True
+            if style.get("superscript"):
+                run.font.superscript = True
+            if style.get("italic"):
+                run.font.italic = True
 
 
 def add_images(slide, prs, images, theme):

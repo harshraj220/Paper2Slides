@@ -1,0 +1,83 @@
+[
+  {
+    "paper": "0520.pdf",
+    "structure_alignment": 0.91,
+    "semantic_fidelity": 0.62,
+    "rouge_l": 0.1196,
+    "weighted_score": 0.5966,
+    "classification": "Good",
+    "narration_grade": 16.3
+  },
+  {
+    "paper": "37714-83954-1-PB.pdf",
+    "structure_alignment": 0.71,
+    "semantic_fidelity": 0.46,
+    "rouge_l": 0.0736,
+    "weighted_score": 0.4453,
+    "classification": "Average",
+    "narration_grade": 17.8
+  },
+  {
+    "paper": "IJRAR1ARP035.pdf",
+    "structure_alignment": 0.97,
+    "semantic_fidelity": 0.64,
+    "rouge_l": 0.157,
+    "weighted_score": 0.6209,
+    "classification": "Good",
+    "narration_grade": 17.2
+  },
+  {
+    "paper": "IJSRA-2024-1205.pdf",
+    "structure_alignment": 0.62,
+    "semantic_fidelity": 0.17,
+    "rouge_l": 0.0262,
+    "weighted_score": 0.203,
+    "classification": "Poor",
+    "narration_grade": 16.32
+  },
+  {
+    "paper": "Inverse_Reinforcement_Learning_With_Graph_Neural_Networks_for_Full-Dimensional_Task_Offloading_in_.pdf",
+    "structure_alignment": 0.95,
+    "semantic_fidelity": 0.55,
+    "rouge_l": 0.1343,
+    "weighted_score": 0.55,
+    "classification": "Good",
+    "narration_grade": 16.68
+  },
+  {
+    "paper": "aiawn.pdf",
+    "structure_alignment": 0.85,
+    "semantic_fidelity": 0.5,
+    "rouge_l": 0.0801,
+    "weighted_score": 0.4915,
+    "classification": "Average",
+    "narration_grade": 17.61
+  },
+  {
+    "paper": "doc_to_ppt.pdf",
+    "structure_alignment": 0.5,
+    "semantic_fidelity": 0.07,
+    "rouge_l": 0.0095,
+    "weighted_score": 0.107,
+    "classification": "Poor",
+    "narration_grade": 18.21
+  },
+  {
+    "paper": "final ieee.pdf",
+    "structure_alignment": 0.88,
+    "semantic_fidelity": 0.62,
+    "rouge_l": 0.2346,
+    "weighted_score": 0.6061,
+    "classification": "Good",
+    "narration_grade": 16.36
+  },
+  {
+    "paper": "paper.pdf",
+    "structure_alignment": 0.88,
+    "semantic_fidelity": 0.56,
+    "rouge_l": 0.0631,
+    "weighted_score": 0.5393,
+    "classification": "Good",
+    "narration_grade": 17.3
+  }
+]

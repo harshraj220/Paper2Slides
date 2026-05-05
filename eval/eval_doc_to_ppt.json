@@ -1,0 +1,77 @@
+{
+  "overall_scores": {
+    "structure_alignment_score": 0.5,
+    "semantic_fidelity_score": 0.07,
+    "lexical_overlap_score_rougel": 0.0095,
+    "overall_weighted_score": 0.107,
+    "overall_classification": "Poor",
+    "avg_narration_readability_grade": 18.21
+  },
+  "slide_classification_summary": {
+    "Good": 0,
+    "Average": 0,
+    "Poor": 6
+  },
+  "slide_details": [
+    {
+      "slide": "- Fast Bullet 1 - Fast Bullet 2 - Fast Bullet 3 - Fast Bullet 4 - Fast Bullet 5 - Fast Bullet 6 - Fast Bullet 7 - Fast Bullet 8",
+      "match_type": "None",
+      "structure_score": 0.0,
+      "rouge_l": 0.0,
+      "semantic_sim": 0.0,
+      "weighted_score": 0.0,
+      "classification": "Poor",
+      "narration_readability": 16.17
+    },
+    {
+      "slide": "INTRODUCTION",
+      "match_type": "Exact",
+      "structure_score": 1.0,
+      "rouge_l": 0.0108,
+      "semantic_sim": 0.1292,
+      "weighted_score": 0.2044,
+      "classification": "Poor",
+      "narration_readability": 19.09
+    },
+    {
+      "slide": "INTRODUCTION (continued)",
+      "match_type": "Exact",
+      "structure_score": 1.0,
+      "rouge_l": 0.0108,
+      "semantic_sim": 0.1142,
+      "weighted_score": 0.1925,
+      "classification": "Poor",
+      "narration_readability": 19.25
+    },
+    {
+      "slide": "Another interesting use case is when using the",
+      "match_type": "None",
+      "structure_score": 0.0,
+      "rouge_l": 0.0,
+      "semantic_sim": 0.0,
+      "weighted_score": 0.0,
+      "classification": "Poor",
+      "narration_readability": 17.0
+    },
+    {
+      "slide": "CONCLUSION",
+      "match_type": "Exact",
+      "structure_score": 1.0,
+      "rouge_l": 0.0353,
+      "semantic_sim": 0.177,
+      "weighted_score": 0.2452,
+      "classification": "Poor",
+      "narration_readability": 21.3
+    },
+    {
+      "slide": "Untitled",
+      "match_type": "None",
+      "structure_score": 0.0,
+      "rouge_l": 0.0,
+      "semantic_sim": 0.0,
+      "weighted_score": 0.0,
+      "classification": "Poor",
+      "narration_readability": 16.48
+    }
+  ]
+}

@@ -47,8 +47,8 @@ MAX_MODEL_CHARS = 12000
 MAX_BULLET_WORDS = 60
 MIN_BULLET_WORDS = 6
 
-MAX_BULLETS_PER_SLIDE = 6
-MIN_BULLETS_PER_SLIDE = 3
+MAX_BULLETS_PER_SLIDE = 4
+MIN_BULLETS_PER_SLIDE = 2
 
 
 
@@ -62,6 +62,7 @@ SECTION_MAP = {
     "introduction": "Introduction",
     "background": "Background",
     "related work": "Related Work",
+    "literature survey": "Related Work",
     "method": "Method",
     "model": "Method",
     "architecture": "Method",
@@ -124,7 +125,7 @@ def rewrite_bullet(sentence: str) -> str:
 
     s = re.sub(r"\s+", " ", sentence.strip())
     
-    # --- CLEANUP PREFIXES (New) ---
+    # --- CLEANUP PREFIXES ---
     # Remove "However,", "Thus,", "Therefore,", "In this paper," etc.
     s = re.sub(r'^(however|therefore|thus|moreover|furthermore|consequently|hence|accordingly|specifically|notably|importantly|interestingly|finally|additionally)[, ]+', '', s, flags=re.IGNORECASE)
     s = re.sub(r'^(in this paper|in this work|we show that|we demonstrate that|we find that|it is observed that)[, ]+', '', s, flags=re.IGNORECASE)
@@ -499,7 +500,10 @@ def chunk_bullets(bullets: List[str]) -> List[List[str]]:
 # IMAGE HANDLING (UNCHANGED)
 # ==============================
 def should_use_images(section: str) -> bool:
-    return section in {"Method", "Results", "Experiments"}
+    # Allow images everywhere except pure metadata sections
+    # This ensures new Tables and Vector Graphs appear where they occur
+    bad_sections = {"references", "bibliography", "acknowledgements"}
+    return section.lower() not in bad_sections
 
 def page_number_from_path(path: str) -> int:
     m = re.search(r'page_(\d+)', os.path.basename(path))
@@ -639,7 +643,7 @@ INSTRUCTIONS:
 OUTPUT:
 """
     try:
-        response = qwen_generate(prompt, max_tokens=1024)
+        response = qwen_generate(prompt, max_tokens=800)
         # Parse bullets
         bullets = []
         for line in response.split('\n'):
@@ -677,21 +681,47 @@ def generate_slides(input_pdf: str, output_ppt: str, max_bullets=4):
     used_images = set()
 
     for sec in sections:
-        section = normalize_section(sec.get("raw_title") or sec.get("title") or "")
-        if section.lower() in SKIP_SECTIONS:
+        # LOGIC: Use normalized section for rules (image usage, bullet count)
+        logic_section = normalize_section(sec.get("raw_title") or sec.get("title") or "")
+        
+        # DISPLAY: Use the actual raw title from the paper (cleaned) for the Slide Header
+        # This fixes "Perfect Heading" request, but we now strip the numbering logic (e.g. "1. Introduction" -> "Introduction")
+        raw_title_in = sec.get("raw_title", "").strip()
+        
+        # Strip leading numbers/roman numerals for cleaner headers
+        # Matches "1.", "1.1.", "IV.", "A.", etc.
+        raw_display_title = re.sub(r'^\s*(?:(?:\d+(?:\.\d+)*)|[IVXLCDM]+|[A-Z])\s*\.?\s+', '', raw_title_in)
+        
+        # Fallback if we accidentally stripped everything
+        if not raw_display_title.strip():
+             raw_display_title = raw_title_in
+
+        # Clean basic noise but keep the original flavor
+        if len(raw_display_title) > 200: 
+            raw_display_title = raw_display_title[:200] + "..."
+            
+        if logic_section.lower() in SKIP_SECTIONS:
             continue
 
         text = normalize_pdf_text(sec.get("text", ""))[:MAX_MODEL_CHARS]
+        
+        # --- OPTIMIZATION: SKIP SHORT SECTIONS ---
+        if len(text) < 600:
+            print(f"[INFO] Skipping short section '{raw_display_title}' ({len(text)} chars)")
+            continue
+
         sentences = extract_sentences(text)
 
-        target = SECTION_TARGET_BULLETS.get(section, 15)
+        target = SECTION_TARGET_BULLETS.get(logic_section, 7)
         
+        print(f"[INFO] ({len(slides_plan) + 1} slides so far) Processing section: {raw_display_title}...")
+
         # --- NEW: TRY QWEN FIRST ---
-        bullets = summarize_section_with_qwen(section, text, target)
+        bullets = summarize_section_with_qwen(raw_display_title, text, target)
         
         # --- FALLBACK: USE RULE-BASED IF QWEN FAILS OR RETURNS NOTHING ---
         if not bullets:
-            print(f"[INFO] Qwen yielded no bullets for {section}, using regex fallback.")
+            print(f"[INFO] Qwen yielded no bullets for {raw_display_title}, using regex fallback.")
             rewritten = [rewrite_bullet(s) for s in sentences]
             bullets = final_bullets(rewritten)
             
@@ -702,7 +732,7 @@ def generate_slides(input_pdf: str, output_ppt: str, max_bullets=4):
             bullets = polish_bullets(bullets)
             bullets = deduplicate_bullets(bullets)
             bullets = remove_low_signal_bullets(bullets)
-            bullets = limit_section_bullets(section, bullets)
+            bullets = limit_section_bullets(logic_section, bullets)
         
         # If Qwen worked, we still run a light cleanup pass
         else:
@@ -723,30 +753,38 @@ def generate_slides(input_pdf: str, output_ppt: str, max_bullets=4):
         # ===== DEDUPLICATION & FILTERING =====
         bullets = deduplicate_bullets(bullets)
         bullets = remove_low_signal_bullets(bullets)
-        bullets = limit_section_bullets(section, bullets)
+        bullets = limit_section_bullets(logic_section, bullets)
         # =====================================
 
         bullet_chunks = chunk_bullets(bullets)
 
-
-
         images = []
-        if should_use_images(section):
+        if should_use_images(logic_section):
             all_paths = [
                 img["path"]
                 for imgs in pages_images.values()
                 for img in imgs
                 if "path" in img
             ]
-            selected = select_best_images(
-                all_paths, section, used_images, MAX_FIGURES_PER_SLIDE
-            )
-            images = [{"path": p, "caption": generate_image_caption(section)} for p in selected]
-            used_images.update(selected)
+            # Match images from the specific pages this section covers
+            section_pages = sec.get("pages", set())
+            
+            # 1. First priority: Images actually ON the pages of this section
+            section_images = [
+                img 
+                for pno, imgs in pages_images.items() 
+                if pno in section_pages 
+                for img in imgs
+            ]
+            
+            # 2. Sort by occurrence
+            images = section_images[:MAX_FIGURES_PER_SLIDE]
 
         for i, chunk in enumerate(bullet_chunks):
+            # Use the RAW TITLE here
+            title_text = raw_display_title if i == 0 else f"{raw_display_title} (continued)"
             slides_plan.append({
-                "title": section if i == 0 else f"{section} (continued)",
+                "title": title_text,
                 "bullets": chunk,
                 "images": images if i == 0 else []
             })
@@ -776,7 +814,10 @@ def generate_slides(input_pdf: str, output_ppt: str, max_bullets=4):
     # -------------------------------------
 
     ppt = build_presentation(slides_plan, output_ppt, doc_title, sections)
-    return ppt, slides_plan
+    
+    # Return all sections to ensure interactive mode has full context
+    # (Filtering was causing issues due to title mismatch)
+    return ppt, slides_plan, sections, doc_title
 
 
 def attach_narration(presentation, slides_plan):

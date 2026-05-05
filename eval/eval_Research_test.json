@@ -1,0 +1,59 @@
+{
+  "overall_scores": {
+    "structure_alignment_score": 0.43,
+    "semantic_fidelity_score": 0.04,
+    "lexical_overlap_score_rougel": 0.0189,
+    "avg_narration_readability_grade": 17.38
+  },
+  "slide_details": [
+    {
+      "slide": "Detection of diabetic retinopathy and classification of its stages by using convolutional neural network",
+      "match_type": "None",
+      "rouge_l": 0.0,
+      "semantic_sim": 0.0,
+      "narration_readability": 15.42
+    },
+    {
+      "slide": "ABSTRACT",
+      "match_type": "None",
+      "rouge_l": 0.0,
+      "semantic_sim": 0.0,
+      "narration_readability": 21.6
+    },
+    {
+      "slide": "INTRODUCTION",
+      "match_type": "Exact",
+      "rouge_l": 0.0331,
+      "semantic_sim": 0.0616,
+      "narration_readability": 22.38
+    },
+    {
+      "slide": "METHOD",
+      "match_type": "Exact",
+      "rouge_l": 0.0564,
+      "semantic_sim": 0.1534,
+      "narration_readability": 15.86
+    },
+    {
+      "slide": "Model",
+      "match_type": "Exact",
+      "rouge_l": 0.0426,
+      "semantic_sim": 0.037,
+      "narration_readability": 9.62
+    },
+    {
+      "slide": "CONCLUSION",
+      "match_type": "None",
+      "rouge_l": 0.0,
+      "semantic_sim": 0.0,
+      "narration_readability": 18.01
+    },
+    {
+      "slide": "Untitled",
+      "match_type": "None",
+      "rouge_l": 0.0,
+      "semantic_sim": 0.0,
+      "narration_readability": 18.76
+    }
+  ]
+}
