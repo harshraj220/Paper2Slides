@@ -23,7 +23,7 @@ Whether you are preparing for a conference, a seminar, or a quick lab meeting, P
 ## ✨ Key Features
 
 - 📄 **Smart PDF Extraction**: Seamlessly extracts text, headings, mathematical context, tables, and visual figures from academic PDFs.
-- 🧠 **AI-Powered Summarization**: Uses **Qwen 2.5 7B** (via OpenRouter) to abstract high-level concepts and generate concise, impactful bullet points.
+- 🧠 **AI-Powered Summarization**: Uses **Qwen 3 80B** (via OpenRouter) to abstract high-level concepts and generate concise, impactful bullet points.
 - 🎨 **Automated Layouts**: Assembles slides dynamically, automatically chunking long sections to prevent text-heavy slides.
 - 🗣️ **Neural Narration (TTS)**: Automatically writes explanatory speaker notes and generates high-quality audio using `edge-tts`.
 - 💬 **Interactive Chat Refinement**: A built-in chat interface allows you to ask questions and refine specific slides on the fly.
@@ -55,7 +55,7 @@ pip install -r requirements.txt
 ```
 
 ### 3. Configure API Keys
-Paper2Slides uses the OpenRouter API for free access to Qwen 2.5. Export your API key in your terminal:
+Paper2Slides uses the OpenRouter API for free access to Qwen 3. Export your API key in your terminal:
 ```bash
 export OPENROUTER_API_KEY="your-openrouter-api-key-here"
 ```
@@ -87,7 +87,7 @@ Paper2Slides/
 ├── paper2slides.py              # CLI Entry Point & Interactive Refinement Loop
 ├── paper2ppt_cli.py             # Core Engine: Orchestrates extraction & layout
 ├── models/
-│   └── qwen_llm.py              # OpenRouter API wrapper for Qwen 2.5
+│   └── qwen_llm.py              # OpenRouter API wrapper for Qwen 3
 ├── paper2ppt_core/
 │   ├── summarize.py             # AI prompt engineering & summarization logic
 │   ├── sections.py              # Academic section detection & filtering
