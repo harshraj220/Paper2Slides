@@ -1,75 +1,119 @@
 import os
 import requests
 import json
+import time
+import sys
 
-# Fetch API key from environment
-# We use OpenRouter because they offer Qwen 2.5 7B completely for FREE
-OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY", "")
+def _show_ui_alert(msg, level="error"):
+    """Safely push notification to Streamlit frontend if running in web context"""
+    if 'streamlit' in sys.modules:
+        try:
+            import streamlit as st
+            if level == "error":
+                 st.error(f"🚨 **Gemini Error:** {msg}")
+            elif level == "warning":
+                 st.warning(f"⏳ **Gemini Warning:** {msg}")
+        except Exception:
+            pass
+
+from itertools import cycle
+
+RAW_KEY_STR = os.getenv("GEMINI_API_KEY", "")
+
+# Dynamic File Ingestion Hook
+if not RAW_KEY_STR:
+    dotenv_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), ".env")
+    if os.path.exists(dotenv_path):
+        with open(dotenv_path, "r") as f:
+            for line in f:
+                if line.strip().startswith("GEMINI_API_KEY="):
+                    RAW_KEY_STR = line.strip().split("=", 1)[1].strip("'\" ")
+                    break
+
+# Construct Cyclical Round-Robin Pool
+KEY_LIST = [k.strip() for k in RAW_KEY_STR.split(",") if k.strip()]
+KEY_POOL = cycle(KEY_LIST) if KEY_LIST else None
 
 def qwen_generate(prompt: str, max_tokens: int = 72, temperature: float = 0.1) -> str:
     """
-    Generate text using Qwen via OpenRouter's free API.
+    Proprietary pipeline hook transparently using Google Gemini.
+    Kept identical naming to preserve existing runtime workflows.
+    
+    ENHANCED: Automatically load-balances and rotates across 
+    multiple pooled keys if supplied in .env.
     """
-    if not OPENROUTER_API_KEY:
-        print("ERROR: OPENROUTER_API_KEY is not set. Please set it in your environment or Streamlit secrets.")
-        return "ERROR: OPENROUTER_API_KEY is not set. Please set it to use the AI features."
+    if not KEY_POOL:
+        print("CRITICAL: No valid keys found in GEMINI_API_KEY pool.")
+        return "ERROR: Key Missing."
 
-    url = "https://openrouter.ai/api/v1/chat/completions"
-    
-    headers = {
-        "Authorization": f"Bearer {OPENROUTER_API_KEY}",
-        "HTTP-Referer": "https://github.com/harshraj220/Paper2Slides",
-        "X-Title": "Paper2Slides",
-        "Content-Type": "application/json"
+    # Setup request structure (Dynamic injection inside loop)
+    headers = {"Content-Type": "application/json"}
+    payload = {
+        "contents": [{"parts": [{"text": prompt}]}],
+        "generationConfig": {
+            "maxOutputTokens": max_tokens,
+            "temperature": temperature
+        }
     }
-    
-    data = {
-        # This specific model string uses OpenRouter's free tier
-        "model": "qwen/qwen3-next-80b-a3b-instruct:free",
-        "messages": [
-            {"role": "user", "content": prompt}
-        ],
-        "max_tokens": max_tokens,
-        "temperature": temperature,
-        "top_p": 0.8,
-        "repetition_penalty": 1.1
-    }
-    
-    import time
-    
-    # Increased attempts to handle strict free-tier rate limits
-    for attempt in range(5):
+
+    # Failover and Multi-Key Traversal Logic
+    for i in range(len(KEY_LIST) * 2 if len(KEY_LIST) > 1 else 4):
         try:
-            response = requests.post(url, headers=headers, json=data, timeout=45)
-            response.raise_for_status()
+            active_key = next(KEY_POOL)
+            url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key={active_key}"
             
-            result = response.json()
-            text = result["choices"][0]["message"]["content"].strip()
+            res = requests.post(url, headers=headers, json=payload, timeout=45)
+            if res.status_code == 429:
+                 raise Exception("Hit Gemini Rate limit")
+            res.raise_for_status()
             
-            # --- HARD STOP: remove chat / role leakage ---
-            for stop in ["Human:", "Assistant:", "System:"]:
-                if stop in text:
-                    text = text.split(stop)[0].strip()
-
-            # Remove leading meta phrases
-            for prefix in ["Sure,", "Here is", "Here's", "Here’s"]:
-                if text.startswith(prefix):
-                    text = text[len(prefix):].lstrip(" :,-")
-                    
-            return text
-        
+            out = res.json()
+            txt = out["candidates"][0]["content"]["parts"][0]["text"].strip()
+            
+            # Preservation filters
+            for s in ["Human:", "Assistant:", "System:"]:
+                if s in txt: txt = txt.split(s)[0].strip()
+            for p in ["Sure,", "Here is", "Here's", "Certainly:"]:
+                if txt.startswith(p): txt = txt[len(p):].lstrip(" :,-")
+            
+            return txt
         except Exception as e:
-            is_rate_limit = "429" in str(e)
-            print(f"API Error (Attempt {attempt+1}): {e}")
-            if 'response' in locals() and hasattr(response, 'text'):
-                print(f"Response: {response.text}")
-                
-            if attempt == 4:
-                raise Exception(f"OpenRouter API failed after 5 attempts: {str(e)}")
+            err_str = str(e)
+            print(f"[GEMINI DEBUG] Attempt {i+1} error: {err_str}")
             
-            # Exponential backoff: 5s, 10s, 20s, 40s (longer for rate limits)
-            sleep_time = (2 ** attempt) * 5 if is_rate_limit else 3
-            print(f"Waiting {sleep_time} seconds before retrying...")
-            time.sleep(sleep_time)
+            # ⚡ INTELLIGENT DYNAMIC COOLING ALGORITHM ⚡
+            wait_seconds = (2**i) * 1.5 # Default Backoff
+            
+            # Inspect raw response to extract Exact Restrict Timers
+            if 'res' in locals() and hasattr(res, 'text') and res.status_code == 429:
+                 import re
+                 # Extract numeric seconds dynamically from the Google API's suggested cooldown string
+                 time_match = re.search(r"retry\s+in\s+([\d.]+)(s|ms)", res.text)
+                 if time_match:
+                     raw_time = float(time_match.group(1))
+                     unit = time_match.group(2)
+                     calc_time = raw_time if unit == "s" else (raw_time / 1000.0)
+                     
+                     # Add 1.5s Safety Padding to ensure backend timer registration syncs
+                     wait_seconds = calc_time + 1.5
+                     print(f"[GEMINI DEBUG] Dynamic Smart-Throttle triggered. Hard cooling for {wait_seconds:.2f}s...")
+            
+            # Dynamic UI Updates based on context
+            if "429" in err_str or "limit" in err_str.lower():
+                if i == 0:
+                    _show_ui_alert(f"Capacity saturated. Smart-throttling pipeline for {wait_seconds:.1f}s automatically...", "warning")
+            elif "403" in err_str or "permission" in err_str.lower():
+                 _show_ui_alert("Permission Denied. Verify your API key validity.", "error")
+
+            if 'res' in locals() and hasattr(res, 'text'):
+                 print(f"[GEMINI DEBUG] Raw Response: {res.text[:500]}")
+                 
+            if i == 3 or i == (len(KEY_LIST) * 2) - 1: 
+                print("[GEMINI DEBUG] Exhausted all retries and alternative keys.")
+                _show_ui_alert(f"All available API keys were exhausted. (Last: {err_str})", "error")
+                break
+            
+            # Direct Injection of Dynamic Delay
+            time.sleep(wait_seconds)
             
     return ""

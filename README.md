@@ -3,7 +3,7 @@
   <p><strong>Transform Research Papers into Narrated, Presentation-Ready PowerPoints in Seconds</strong></p>
 
   [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
-  [![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://deckify.streamlit.app/)
+  [![Backend: FastAPI](https://img.shields.io/badge/Backend-FastAPI-009688.svg)](https://fastapi.tiangolo.com/)
   [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 </div>
@@ -12,35 +12,26 @@
 
 ## 🌟 Overview
 
-**Paper2Slides** is an end-to-end automated pipeline and web application that instantly converts academic research papers (PDFs) into concise, high-quality presentation slides. 
+**Paper2Slides** is a next-generation AI architecture that instantly converts dense academic research papers (PDFs) into concise, high-fidelity presentation slides. 
 
-Beyond just summarizing text, Paper2Slides intelligently extracts diagrams and tables, generates a logical presentation flow, and synthesizes **hidden speaker notes and TTS narration audio** for every single slide.
+Beyond basic summarization, the engine recursively extracts key methodologies, isolates mathematical theorems, generates structured visual hierarchies, and automatically records **hidden neural TTS narration** directly into every PowerPoint slide.
 
-Whether you are preparing for a conference, a seminar, or a quick lab meeting, Paper2Slides handles the heavy lifting so you can focus on the delivery.
-
----
-
-## ✨ Key Features
-
-- 📄 **Smart PDF Extraction**: Seamlessly extracts text, headings, mathematical context, tables, and visual figures from academic PDFs.
-- 🧠 **AI-Powered Summarization**: Uses **Qwen 3 80B** (via OpenRouter) to abstract high-level concepts and generate concise, impactful bullet points.
-- 🎨 **Automated Layouts**: Assembles slides dynamically, automatically chunking long sections to prevent text-heavy slides.
-- 🗣️ **Neural Narration (TTS)**: Automatically writes explanatory speaker notes and generates high-quality audio using `edge-tts`.
-- 💬 **Interactive Chat Refinement**: A built-in chat interface allows you to ask questions and refine specific slides on the fly.
-- ☁️ **Cloud Ready**: Lightweight dependency structure, easily deployable to Streamlit Community Cloud.
+This platform features a robust **FastAPI-driven microservices architecture** wrapped in a high-end, obsidian-glassmorphic dashboard for a first-class research experience.
 
 ---
 
-## 🚀 Live Demo
+## ✨ Premium Feature Suite
 
-Try the live web application directly in your browser:
-👉 **[Deckify on Streamlit](https://deckify.streamlit.app/)**
+- 🎨 **Next-Gen Aesthetic Suite**: Ditch minimal UIs for a high-performance, animated visual dashboard with custom glassmorphic panels and real-time telemetry widgets.
+- 🚀 **FastAPI Core Engine**: Asynchronous background queuing ensures massive parallel workloads without blocking your HTTP experience.
+- 🧠 **Smart Contextual Extraction**: Leverages cutting-edge LLM abstractive synthesis to distill complex theories rather than simply copy-pasting equations.
+- 💬 **Neural Refinement Chat**: A built-in conversational bridge allowing researchers to "chat" with slides and execute on-the-fly targeted reconstruction of any node.
+- 📊 **Real-Time Streaming Console**: Advanced backend event interception yields a visual monitoring console directly in the web plane, providing immediate feedback on synthesis heartbeats and rate-limiting throttling.
+- 🗣️ **Edge TTS Autopilot**: Fully embedded, crystal-clear AI voices embedded invisibly into speaker notes.
 
 ---
 
-## 💻 Local Installation
-
-To run Paper2Slides on your local machine, follow these steps:
+## 🚀 Local Installation & Deployment
 
 ### 1. Clone the Repository
 ```bash
@@ -49,73 +40,63 @@ cd Paper2Slides
 ```
 
 ### 2. Install Dependencies
-Ensure you have Python 3.11+ installed.
+Ensure you possess a Python 3.11+ environment.
 ```bash
 pip install -r requirements.txt
 ```
 
-### 3. Configure API Keys
-Paper2Slides uses the OpenRouter API for free access to Qwen 3. Export your API key in your terminal:
+### 3. Provision Authorization Keys
+Paper2Slides operates leveraging modern LLM APIs. Configure your environment variables:
 ```bash
-export OPENROUTER_API_KEY="your-openrouter-api-key-here"
+export GEMINI_API_KEY="your-gemini-api-key-here"
 ```
+
+### 4. Fire Up the Server Cluster
+Initialize the standalone FastAPI gateway (runs on standard HTTP port for universal mapping):
+```bash
+uvicorn main_api:app --host 0.0.0.0 --port 80
+```
+
+*Access UI instantly at:* `http://localhost`
 
 ---
 
-## 🛠️ Usage
-
-### Running the Web Application (Streamlit)
-To launch the interactive web UI:
-```bash
-streamlit run app.py
-```
-
-### Running the CLI Pipeline
-If you prefer to generate presentations directly from the command line:
-```bash
-python3 paper2slides.py path/to/your/paper.pdf
-```
-*Output: A file named `<paper_name>_summary_with_narration.pptx` will be generated in the root directory.*
-
----
-
-## 📂 Project Architecture
+## 📂 System Architecture
 
 ```text
 Paper2Slides/
-├── app.py                       # Streamlit Web Application Entry Point
-├── paper2slides.py              # CLI Entry Point & Interactive Refinement Loop
-├── paper2ppt_cli.py             # Core Engine: Orchestrates extraction & layout
+├── main_api.py                  # FastAPI Enterprise Backend & Background Queue
+├── static/index.html            # High-Fidelity Premium Dashboard (Obsidian Glass)
+├── paper2ppt_cli.py             # Primary Extractor & Generation Harness
+├── paper2slides.py              # Modular Interactive Inference Helpers
 ├── models/
-│   └── qwen_llm.py              # OpenRouter API wrapper for Qwen 3
+│   └── qwen_llm.py              # LLM orchestration & retry-loop wrapper
 ├── paper2ppt_core/
-│   ├── summarize.py             # AI prompt engineering & summarization logic
-│   ├── sections.py              # Academic section detection & filtering
-│   ├── io.py                    # PDF parsing and image extraction (PyMuPDF)
-│   └── pptx_builder.py          # PowerPoint XML generation engine
-├── ppt_narration_project/       
-│   ├── narration_generator.py   # AI script writing for speaker notes
-│   ├── tts_generator.py         # Neural TTS generation via Edge-TTS
-│   └── ppt_audio_embedder.py    # Embeds audio directly into PPTX slides
-└── requirements.txt             # Lightweight dependencies for cloud deployment
+│   ├── summarize.py             # Academic prompt abstraction logic
+│   ├── sections.py              # Semantic section mapping & filtering
+│   └── pptx_builder.py          # Native XML Presentation Generator
+└── ppt_narration_project/       
+    ├── narration_generator.py   # Speaker note AI scripts
+    ├── tts_generator.py         # Edge-TTS asynchronous generators
+    └── ppt_audio_embedder.py    # Hidden binary audio stream injector
 ```
 
 ---
 
-## 🧠 Design Philosophy
+## 🧠 Strategic Philosophy
 
-1. **Noise Reduction over Raw Extraction**: Academic papers are filled with equations, citations, and dense formatting. Paper2Slides is heavily prompted to abstract concepts rather than copy-pasting garbled text.
-2. **Accessible AI**: By migrating from heavy local GPU models to the OpenRouter API, this tool runs instantly on any laptop and easily deploys to free cloud tiers.
-3. **Human-in-the-Loop**: Generating slides isn't a one-shot process. The interactive chat loop allows users to critique and regenerate specific sections without starting over.
+1. **Zero-NPM Architecture**: The frontend utilizes Native Vanilla components to remain lightweight and cloud-agnostic, eliminating `node_modules` bloat.
+2. **Abstractive Authority**: We enforce rigorous LLM directives targeting "synthesis over repetition," guaranteeing your slides actually teach rather than copy.
+3. **Stateless Resiliency**: Our background task queuing paradigm handles crashes gracefully and tracks jobs using persistent RAM mapping.
 
 ---
 
 ## 🤝 Contributing
 
-Contributions, issues, and feature requests are welcome! Feel free to check the [issues page](https://github.com/harshraj220/Paper2Slides/issues).
+Technical issues, architectural feedback, and contribution bridges are highly welcome! Inspect the [issues page](https://github.com/harshraj220/Paper2Slides/issues).
 
 ---
 
 <div align="center">
-  <i>Built with ❤️ by Harsh Raj</i>
+  <i>Engineered with Excellence by Harsh Raj</i>
 </div>
