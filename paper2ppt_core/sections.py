@@ -96,6 +96,7 @@ def normalize_heading(h: str) -> str:
     if "conclusion" in s or "limitation" in s: return "conclusion"
     if "literature" in s and "survey" in s: return "related work"
     if "discussion" in s: return "discussion"
+    if "references" in s or "bibliography" in s: return "references"
 
     return "section"
 

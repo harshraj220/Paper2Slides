@@ -24,6 +24,9 @@ from paper2ppt_core.sections import split_into_sections
 from paper2ppt_core.pptx_builder import build_presentation, MAX_FIGURES_PER_SLIDE
 from ppt_narration_project.narration_generator import generate_narration
 
+from citation_extractor import execute_citation_discovery
+from knowledge_builder import construct_knowledge_base
+
 
 # pyright: reportMissingImports=false
 from pptx import Presentation
@@ -33,11 +36,11 @@ from pptx import Presentation
 # Optional LLM (SAFE OFF by default)
 # ==============================
 try:
-    from models.qwen_llm import qwen_generate  # type: ignore
+    from models.mistral_llm import mistral_generate  # type: ignore
     HAS_LLM = True
 except Exception:
     HAS_LLM = False
-    def qwen_generate(prompt: str, max_tokens: int = 64, temperature: float = 0.1) -> str:
+    def mistral_generate(prompt: str, max_tokens: int = 64, temperature: float = 0.1) -> str:
         return ""
 
 # ==============================
@@ -580,10 +583,10 @@ def remove_low_signal_bullets(bullets):
 
 
 # ==============================
-# QWEN SUMMARIZATION LOGIC
+# MISTRAL SUMMARIZATION LOGIC
 # ==============================
 
-def extract_title_with_qwen(first_page_text: str) -> str:
+def extract_title_with_mistral(first_page_text: str) -> str:
     if not HAS_LLM:
         return ""
     prompt = f"""
@@ -596,10 +599,10 @@ def extract_title_with_qwen(first_page_text: str) -> str:
     TITLE:
     """
     try:
-        title = qwen_generate(prompt, max_tokens=64).strip()
+        title = mistral_generate(prompt, max_tokens=64).strip()
         # Clean up if it's too long or has newlines
         title = title.replace("\n", " ")
-        # Remove common prefixes if Qwen generated them
+        # Remove common prefixes if Mistral generated them
         if title.lower().startswith("title:"):
             title = title[6:].strip()
         if len(title) > 300: # Sanity check
@@ -609,18 +612,31 @@ def extract_title_with_qwen(first_page_text: str) -> str:
         print(f"[WARN] Title extraction failed: {e}")
         return ""
 
-def summarize_section_with_qwen(section_title: str, section_text: str, target_bullets: int) -> List[str]:
+def summarize_section_with_mistral(section_title: str, section_text: str, target_bullets: int, knowledge_base: dict = None) -> List[str]:
     """
-    Uses Qwen to generate high-quality bullet points for the slide.
+    Uses Mistral to generate high-quality bullet points for the slide, enriched by our external knowledge graph.
     """
     if not HAS_LLM:
         return []
 
-    print(f"[INFO] Using Qwen LLM for summarization of section: {section_title}")
+    print(f"[INFO] Using Mistral LLM for summarization of section: {section_title}")
+    
+    kb_context = ""
+    if knowledge_base and section_title.lower() in ["introduction", "overview", "related work", "background"]:
+        kb_context = "\n--- CROSS-PAPER KNOWLEDGE BASE (Use to enrich context) ---\n"
+        cited = knowledge_base.get("cited_nodes", [])
+        for node in cited[:3]: # Only pull top 3 to preserve context limit
+             kb_context += f"- Contextual Theme: {node.get('title')[:60]} emphasizes {', '.join(node.get('claims', []))}\n"
+        
+        relations = knowledge_base.get("relations", [])
+        for rel in relations[:3]:
+             kb_context += f"- Contextual Relation: Core work relates to '{rel.get('source')[:40]}' as: {rel.get('relation')}\n"
+        kb_context += "-------------------------------------------------------------\n"
 
     prompt = f"""
 You are an expert research scientist assisting in creating a high-quality presentation.
 Your goal is to SYNTHESIZE and EXTRACT key technical details from the provided text into clear, standalone bullet points.
+{kb_context}
 Avoid generic summaries. If this section is a continuation (e.g., 'Model (continued)'), focus on abstracting the broad themes and high-level concepts rather than copying repetitive raw text.
 
 SECTION: {section_title}
@@ -631,19 +647,17 @@ INSTRUCTIONS:
 1. Extract exactly {target_bullets + 2} distinct key points.
 2. Each bullet must be a COMPLETE and COHERENT sentence ending with a period. It must make complete sense on its own.
 3. BE SPECIFIC BUT CONCEPTUAL: Include metrics and method names, but do not get bogged down in excessive low-level details.
-4. MATH & TABLES & NOISE: 
+4. STRICTLY GROUNDED: You must ONLY use the provided TEXT. Do NOT bring in any outside knowledge, do not hallucinate, and do not invent new claims. If the KNOWLEDGE BASE is provided, use it ONLY for context, do not write extra claims from it.
+5. MATH & TABLES & NOISE: 
    - Extract key insights from tables as text.
-   - STRONGLY IGNORE and DO NOT INCLUDE any garbled text, broken mathematical equations (e.g., 'V in q = .'), single variables, or random artifact symbols. 
-   - If a sentence seems cut off or meaningless, skip it completely.
-5. NO FILLER: Do not use "The paper discusses...", "This section shows...", etc. Start directly with the fact.
-6. NO HALLUCINATIONS: Only use information present in the text.
-7. IGNORE citations (e.g. [12]), figures (e.g. Fig 1), and acknowledgments.
-8. FORMAT: Return a simple list where each line starts with "- ". Never use nested bullets.
+   - STRONGLY IGNORE and DO NOT INCLUDE any garbled text, broken mathematical equations, single variables, or random artifacts.
+6. NO FILLER: Do not use "The paper discusses...", "This section shows...", etc. Start directly with the fact.
+7. FORMAT: Return a simple list where each line starts with "- ".
 
 OUTPUT:
 """
     try:
-        response = qwen_generate(prompt, max_tokens=800)
+        response = mistral_generate(prompt, max_tokens=800)
         # Parse bullets
         bullets = []
         for line in response.split('\n'):
@@ -659,7 +673,7 @@ OUTPUT:
             
         return bullets
     except Exception as e:
-        print(f"[WARNING] Qwen summarization failed for {section_title}: {e}")
+        print(f"[WARNING] Mistral summarization failed for {section_title}: {e}")
         return []
 
 
@@ -669,14 +683,47 @@ def limit_section_bullets(section, bullets):
         return bullets
     return bullets[:target]
 
-
 # ==============================
 # CORE PIPELINE (STABLE)
 # ==============================
 def generate_slides(input_pdf: str, output_ppt: str, max_bullets=4):
     pages_text, pages_images = load_input_paper(input_pdf)
     sections = split_into_sections(pages_text)
-
+    
+    # ----------------------------------------------------------
+    # PRE-PHASE: CORE METADATA EXTRACTION
+    # ----------------------------------------------------------
+    print("[paper2ppt] Pre-extracting presentation metadata...")
+    doc_title = ""
+    if pages_text:
+        doc_title = extract_title_with_mistral(pages_text[0])
+    if not doc_title or len(doc_title) < 5:
+        doc_title = Path(input_pdf).stem
+        
+    # Find Abstract text & Reference text
+    abs_text = ""
+    ref_text = ""
+    for s in sections:
+        st = s.get("title", "").lower()
+        if "abstract" in st:
+            abs_text = s.get("text", "")
+        if "references" in st:
+            ref_text = s.get("text", "")
+            
+    # ----------------------------------------------------------
+    # KNOWLEDGE BASE ACTIVATION (PHASE 2 + 3)
+    # ----------------------------------------------------------
+    knowledge_base = None
+    if abs_text and ref_text and HAS_LLM:
+        try:
+            # PHASE 2: Discover Citations
+            citations = execute_citation_discovery(ref_text, abs_text, limit=4)
+            # PHASE 3: Construct Knowledge Graph
+            knowledge_base = construct_knowledge_base(doc_title, abs_text, citations)
+            print("[paper2ppt] Knowledge Base online. Advancing to Slide Synthesis.")
+        except Exception as e:
+            print(f"[paper2ppt WARN] Knowledge Base failure: {e}. Proceeding without context.")
+    
     slides_plan = []
     used_images = set()
 
@@ -685,18 +732,14 @@ def generate_slides(input_pdf: str, output_ppt: str, max_bullets=4):
         logic_section = normalize_section(sec.get("raw_title") or sec.get("title") or "")
         
         # DISPLAY: Use the actual raw title from the paper (cleaned) for the Slide Header
-        # This fixes "Perfect Heading" request, but we now strip the numbering logic (e.g. "1. Introduction" -> "Introduction")
         raw_title_in = sec.get("raw_title", "").strip()
         
         # Strip leading numbers/roman numerals for cleaner headers
-        # Matches "1.", "1.1.", "IV.", "A.", etc.
         raw_display_title = re.sub(r'^\s*(?:(?:\d+(?:\.\d+)*)|[IVXLCDM]+|[A-Z])\s*\.?\s+', '', raw_title_in)
         
-        # Fallback if we accidentally stripped everything
         if not raw_display_title.strip():
              raw_display_title = raw_title_in
 
-        # Clean basic noise but keep the original flavor
         if len(raw_display_title) > 200: 
             raw_display_title = raw_display_title[:200] + "..."
             
@@ -711,17 +754,16 @@ def generate_slides(input_pdf: str, output_ppt: str, max_bullets=4):
             continue
 
         sentences = extract_sentences(text)
-
         target = SECTION_TARGET_BULLETS.get(logic_section, 7)
         
         print(f"[INFO] ({len(slides_plan) + 1} slides so far) Processing section: {raw_display_title}...")
 
-        # --- NEW: TRY QWEN FIRST ---
-        bullets = summarize_section_with_qwen(raw_display_title, text, target)
+        # --- NEW: TRY MISTRAL WITH KNOWLEDGE BASE PASSED IN ---
+        bullets = summarize_section_with_mistral(raw_display_title, text, target, knowledge_base)
         
-        # --- FALLBACK: USE RULE-BASED IF QWEN FAILS OR RETURNS NOTHING ---
+        # --- FALLBACK: USE RULE-BASED IF MISTRAL FAILS OR RETURNS NOTHING ---
         if not bullets:
-            print(f"[INFO] Qwen yielded no bullets for {raw_display_title}, using regex fallback.")
+            print(f"[INFO] Mistral yielded no bullets for {raw_display_title}, using regex fallback.")
             rewritten = [rewrite_bullet(s) for s in sentences]
             bullets = final_bullets(rewritten)
             
@@ -734,10 +776,10 @@ def generate_slides(input_pdf: str, output_ppt: str, max_bullets=4):
             bullets = remove_low_signal_bullets(bullets)
             bullets = limit_section_bullets(logic_section, bullets)
         
-        # If Qwen worked, we still run a light cleanup pass
+        # If Mistral worked, we still run a light cleanup pass
         else:
              bullets = [light_polish_bullet(b) for b in bullets]
-             # Ensure we don't have too many if Qwen hallucinated extra
+             # Ensure we don't have too many if Mistral hallucinated extra
              if len(bullets) > target + 5:
                  bullets = bullets[:target+5]
 
@@ -792,31 +834,7 @@ def generate_slides(input_pdf: str, output_ppt: str, max_bullets=4):
 
 
 
-    # --- INTELLIGENT TITLE EXTRACTION ---
-    print("[paper2ppt] Determining presentation title...")
-    doc_title = ""
-    if pages_text:
-        # 1. Try Qwen Extraction
-        doc_title = extract_title_with_qwen(pages_text[0])
-        if doc_title:
-             print(f"[paper2ppt] Title extracted via Qwen: {doc_title}")
-        
-        # 2. Fallback to first line
-        if not doc_title or len(doc_title) < 5:
-            doc_title = pages_text[0].split("\n")[0]
-            print(f"[paper2ppt] Title extracted via First Line: {doc_title}")
-
-    # 3. Last resort fallback
-    if not doc_title or len(doc_title) < 5:
-        doc_title = Path(input_pdf).stem
-        print(f"[paper2ppt] Title fallback to filename: {doc_title}")
-    
-    # -------------------------------------
-
     ppt = build_presentation(slides_plan, output_ppt, doc_title, sections)
-    
-    # Return all sections to ensure interactive mode has full context
-    # (Filtering was causing issues due to title mismatch)
     return ppt, slides_plan, sections, doc_title
 
 

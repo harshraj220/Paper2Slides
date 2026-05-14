@@ -7,11 +7,12 @@ __pycache__/
 *.pyd
 *.egg-info/
 .eggs/
+.env
 .env/
 venv/
 .env*/
 .venv/
-
+.env
 # ===============================
 # OS / Editor
 # ===============================
@@ -74,3 +75,5 @@ temp/
 # ===============================
 paper2ppt_audio/
 paper2ppt_figs/
+narration_cache.json
+api_storage/

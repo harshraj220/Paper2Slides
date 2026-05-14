@@ -1,4 +1,5 @@
 import os
+import re
 import uuid
 import shutil
 import sys
@@ -28,7 +29,7 @@ class LiveLogBuffer(io.StringIO):
 
         # List of inclusion signals relevant to monitoring
         important = [
-            "[gemini", "processing section", "cooling", "throttle", "limit",
+            "[gemini", "[bedrock", "processing section", "cooling", "throttle", "limit",
             "critical", "error", "warning", "fail", "extraction",
             "[info] (", "[paper2ppt]"
         ]
@@ -37,7 +38,7 @@ class LiveLogBuffer(io.StringIO):
         if any(key in lower_s for key in important):
             ts = time.strftime("[%H:%M:%S]")
             # Cleanup noisy tagging for user aesthetic
-            display_txt = clean_s.replace("[GEMINI DEBUG] ", "🧠 ").replace("[INFO] ", "📋 ")
+            display_txt = clean_s.replace("[GEMINI DEBUG] ", "🧠 ").replace("[BEDROCK DEBUG] ", "🧠 ").replace("[INFO] ", "📋 ")
             self.buffer.append(f"{ts} {display_txt}")
 
     def get_recent(self):

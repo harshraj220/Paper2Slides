@@ -13,35 +13,135 @@ from paper2slides import (
 )
 
 # Configuration for page
-st.set_page_config(page_title="Paper2Slides AI", layout="wide", page_icon="📄")
+st.set_page_config(
+    page_title="Paper2Slides AI Pro", 
+    layout="wide", 
+    page_icon="⚡",
+    initial_sidebar_state="expanded"
+)
 
+# PREMIUM UI INJECTION SYSTEM
 st.markdown("""
     <style>
-    /* CSS for premium look */
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap');
+    
+    /* Core App Overrides */
     .stApp {
-        background-color: #0f172a;
-        color: #f8fafc;
+        background: radial-gradient(circle at 0% 0%, #1e1e2e 0%, #0f111a 100%);
+        background-attachment: fixed;
+        font-family: 'Outfit', system-ui, -apple-system, sans-serif;
     }
-    .stButton>button {
-        border-radius: 8px;
-        transition: 0.3s;
-        border: 1px solid #38bdf8;
+    
+    /* Fonts */
+    html, body, [class*="css"]  {
+        font-family: 'Outfit', sans-serif;
     }
-    .stButton>button:hover {
-        background-color: #38bdf8;
-        color: white;
+    
+    /* High-End H1 Design */
+    h1 {
+        background: linear-gradient(135deg, #ffffff 0%, #94a3b8 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-weight: 800 !important;
+        font-size: 3rem !important;
+        letter-spacing: -0.03em !important;
+        padding-bottom: 0.5rem;
     }
+    
+    h3 {
+        color: #e2e8f0 !important;
+        font-weight: 600 !important;
+        letter-spacing: -0.01em;
+    }
+
+    /* Sidebar styling */
+    [data-testid="stSidebar"] {
+        background-color: rgba(17, 24, 39, 0.8);
+        border-right: 1px solid rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+    }
+
+    /* Input/Uploader Area styling */
+    [data-testid="stFileUploadDropzone"] {
+        background: rgba(255, 255, 255, 0.02) !important;
+        border: 2px dashed rgba(99, 102, 241, 0.4) !important;
+        border-radius: 16px !important;
+        padding: 2rem !important;
+        transition: 0.3s ease;
+    }
+    
+    [data-testid="stFileUploadDropzone"]:hover {
+        background: rgba(99, 102, 241, 0.05) !important;
+        border-color: #6366f1 !important;
+    }
+
+    /* Primary Action Buttons */
+    .stButton > button {
+        background: linear-gradient(90deg, #4f46e5 0%, #7c3aed 100%) !important;
+        color: white !important;
+        border-radius: 12px !important;
+        border: none !important;
+        font-weight: 600 !important;
+        padding: 0.6rem 1.5rem !important;
+        box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.2) !important;
+        transition: all 0.3s ease !important;
+    }
+
+    .stButton > button:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 15px 25px -5px rgba(99, 102, 241, 0.4) !important;
+    }
+
+    /* Download specific button logic */
+    [data-testid="stDownloadButton"] > button {
+         background: linear-gradient(90deg, #10b981 0%, #059669 100%) !important;
+         box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.2) !important;
+    }
+
+    /* Chat Message Blocks */
     .stChatMessage {
-        background-color: rgba(30, 41, 59, 0.7);
-        border-radius: 12px;
-        padding: 1rem;
-        border: 1px solid #334155;
+        background: rgba(255, 255, 255, 0.03) !important;
+        border: 1px solid rgba(255, 255, 255, 0.06) !important;
+        border-radius: 16px !important;
+        padding: 1.5rem !important;
+        backdrop-filter: blur(8px);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+        margin-bottom: 1rem !important;
     }
+    
+    .stChatMessage[data-testid="stChatMessageUser"] {
+         background: rgba(99, 102, 241, 0.1) !important;
+         border: 1px solid rgba(99, 102, 241, 0.2) !important;
+    }
+
+    /* Expanding slide details */
+    .stExpander {
+        background: rgba(255,255,255,0.02) !important;
+        border: 1px solid rgba(255,255,255,0.06) !important;
+        border-radius: 12px !important;
+    }
+
+    /* Badge/Pill tags for UI flow */
+    .hero-badge {
+        display: inline-flex;
+        background: rgba(168, 85, 247, 0.15);
+        color: #c084fc;
+        padding: 0.25rem 0.75rem;
+        border-radius: 999px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        border: 1px solid rgba(168, 85, 247, 0.3);
+        margin-bottom: 1rem;
+    }
+    
     </style>
 """, unsafe_allow_html=True)
 
-st.title("📄 Paper2Slides AI")
-st.markdown("Convert research papers into **automated presentation slides** with hidden audio narration.")
+# Render Hero Structure
+st.markdown('<span class="hero-badge">⚡ NEXT-GEN AI ARCHITECTURE</span>', unsafe_allow_html=True)
+st.title("Paper2Slides Pro")
+st.markdown("### Deep extraction & real-time intelligent synthesis for academic PDF workflows.")
+st.divider()
 
 # State initialization
 if "messages" not in st.session_state:
@@ -244,4 +344,30 @@ if st.session_state.slides_plan is not None:
                         }
                         st.rerun()
 else:
-    st.info("👈 Upload a PDF on the sidebar to get started.")
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        st.markdown("""
+        <div style="background:rgba(255,255,255,0.03); padding:1.5rem; border-radius:16px; border: 1px solid rgba(255,255,255,0.05);">
+            <h4 style="margin-top:0; color:#818cf8;">📄 Smart Extraction</h4>
+            <p style="color:#94a3b8; font-size:0.9rem; margin-bottom:0;">Auto-identifies methodology, results, and complex tables directly from dense academic PDFs.</p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+    with col2:
+        st.markdown("""
+        <div style="background:rgba(255,255,255,0.03); padding:1.5rem; border-radius:16px; border: 1px solid rgba(255,255,255,0.05);">
+            <h4 style="margin-top:0; color:#c084fc;">🧠 Gemini Synthesis</h4>
+            <p style="color:#94a3b8; font-size:0.9rem; margin-bottom:0;">Leverages Gemini-3 advanced logic to abstract deep insights into distinct slide narratives.</p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+    with col3:
+        st.markdown("""
+        <div style="background:rgba(255,255,255,0.03); padding:1.5rem; border-radius:16px; border: 1px solid rgba(255,255,255,0.05);">
+            <h4 style="margin-top:0; color:#38bdf8;">🗣️ Audio Integration</h4>
+            <p style="color:#94a3b8; font-size:0.9rem; margin-bottom:0;">Automatically generates and embeds hidden neural TTS speaker notes into your file.</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+    st.info("💡 **Ready to begin?** Drag and drop your research paper PDF into the sidebar on the left!")

@@ -46,9 +46,12 @@ pip install -r requirements.txt
 ```
 
 ### 3. Provision Authorization Keys
-Paper2Slides operates leveraging modern LLM APIs. Configure your environment variables:
-```bash
-export GEMINI_API_KEY="your-gemini-api-key-here"
+Paper2Slides operates leveraging modern LLM APIs. Configure your environment variables in a `.env` file:
+```env
+AWS_ACCESS_KEY_ID="your-aws-access-key"
+AWS_SECRET_ACCESS_KEY="your-aws-secret-key"
+AWS_REGION="us-east-1"
+BEDROCK_MODEL_ID="mistral.mistral-large-2402-v1:0"
 ```
 
 ### 4. Fire Up the Server Cluster
@@ -70,7 +73,7 @@ Paper2Slides/
 ├── paper2ppt_cli.py             # Primary Extractor & Generation Harness
 ├── paper2slides.py              # Modular Interactive Inference Helpers
 ├── models/
-│   └── qwen_llm.py              # LLM orchestration & retry-loop wrapper
+│   └── mistral_llm.py              # LLM orchestration & retry-loop wrapper
 ├── paper2ppt_core/
 │   ├── summarize.py             # Academic prompt abstraction logic
 │   ├── sections.py              # Semantic section mapping & filtering

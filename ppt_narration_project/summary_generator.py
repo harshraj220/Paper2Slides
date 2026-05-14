@@ -1,4 +1,4 @@
-from models.qwen_llm import qwen_generate
+from models.mistral_llm import mistral_generate
 
 
 def generate_summary(title: str, slide_text: str) -> str:
@@ -18,4 +18,4 @@ TITLE:
 CONTENT:
 {slide_text}
 """
-    return qwen_generate(prompt, max_tokens=120)
+    return mistral_generate(prompt, max_tokens=120)

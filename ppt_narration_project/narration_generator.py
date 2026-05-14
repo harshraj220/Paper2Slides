@@ -1,5 +1,5 @@
 import re
-from models.qwen_llm import qwen_generate
+from models.mistral_llm import mistral_generate
 
 __all__ = ["generate_narration"]
 
@@ -23,7 +23,7 @@ Constraints:
 Narration:
 """.strip()
 
-    text = qwen_generate(prompt, max_tokens=80).strip()
+    text = mistral_generate(prompt, max_tokens=80).strip()
 
     # 1. Regex cleaning for timestamps and labels
     # Remove leading timestamps like "12:00 " or "[00:10] "

@@ -170,6 +170,14 @@ def add_bullets(slide, prs, bullets, has_images, theme):
     for i, b in enumerate(bullets):
         if not b:
             continue
+            
+        # Clean up raw markdown bullets and use a clean Unicode bullet
+        b = b.strip()
+        if b.startswith("* "):
+            b = b[2:].strip()
+        if b.startswith("- "):
+            b = b[2:].strip()
+        b = "•  " + b
 
     # Parse and add formatted text runs
         try:
@@ -180,7 +188,8 @@ def add_bullets(slide, prs, bullets, has_images, theme):
 
         p = tf.add_paragraph() if i > 0 else tf.paragraphs[0]
         p.level = 0
-        p.space_after = Pt(12)
+        p.space_after = Pt(14)
+        p.line_spacing = 1.15
 
         for text_seg, style in segments:
             if not text_seg: continue
@@ -308,8 +317,7 @@ def build_presentation(slides_plan, output_path, doc_title, sections, theme_name
     
     if len(title_slide.placeholders) > 1:
         subtitle = title_slide.placeholders[1]
-        subtitle.text = f"Research Summary & Analysis\nGenerated on {datetime.utcnow().strftime('%Y-%m-%d')}"
-        subtitle.text_frame.paragraphs[0].font.color.rgb = rgb(theme["accent_color"])
+        subtitle.text = ""
 
     _draw_footer(title_slide, prs, theme)
     # -------------------

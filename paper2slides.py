@@ -21,11 +21,11 @@ from typing import List, Dict, Any
 from paper2ppt_cli import generate_slides, normalize_section
 from paper2ppt_core.pptx_builder import build_presentation
 from ppt_narration_project.main import generate_narrated_ppt
-from models.qwen_llm import qwen_generate
+from models.mistral_llm import mistral_generate
 
 def find_relevant_section(query: str, sections: List[Dict[str, Any]]) -> Dict[str, Any]:
     """
-    Identifies the best matching section for a user's query using Qwen + Fuzzy Matching.
+    Identifies the best matching section for a user's query using Mistral + Fuzzy Matching.
     """
     if not sections:
         print("[Error] No sections available to search.")
@@ -98,7 +98,7 @@ def find_relevant_section(query: str, sections: List[Dict[str, Any]]) -> Dict[st
     Section Name:
     """
     
-    response = qwen_generate(prompt, max_tokens=64).strip()
+    response = mistral_generate(prompt, max_tokens=64).strip()
     cleaned = response.strip("'\" .").lower()
     
     # Try to find exact match from LLM output
@@ -134,7 +134,7 @@ def explain_section(query: str, section_text: str) -> str:
     
     RESPONSE:
     """
-    raw_response = qwen_generate(prompt, max_tokens=1024)
+    raw_response = mistral_generate(prompt, max_tokens=1024)
     
     # Post-processing to clean up repetition loop:
     lines = raw_response.split('\n')
@@ -176,7 +176,7 @@ def generate_bullets_from_explanation(explanation: str) -> List[str]:
     
     BULLETS:
     """
-    response = qwen_generate(prompt, max_tokens=1024)
+    response = mistral_generate(prompt, max_tokens=1024)
     bullets = []
     for line in response.split('\n'):
         line = line.strip()
