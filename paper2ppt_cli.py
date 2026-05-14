@@ -686,7 +686,7 @@ def limit_section_bullets(section, bullets):
 # ==============================
 # CORE PIPELINE (STABLE)
 # ==============================
-def generate_slides(input_pdf: str, output_ppt: str, max_bullets=4):
+def generate_slides(input_pdf: str, output_ppt: str, max_bullets=4, disable_kb: bool = False):
     pages_text, pages_images = load_input_paper(input_pdf)
     sections = split_into_sections(pages_text)
     
@@ -714,7 +714,7 @@ def generate_slides(input_pdf: str, output_ppt: str, max_bullets=4):
     # KNOWLEDGE BASE ACTIVATION (PHASE 2 + 3)
     # ----------------------------------------------------------
     knowledge_base = None
-    if abs_text and ref_text and HAS_LLM:
+    if abs_text and ref_text and HAS_LLM and not disable_kb:
         try:
             # PHASE 2: Discover Citations
             citations = execute_citation_discovery(ref_text, abs_text, limit=4)

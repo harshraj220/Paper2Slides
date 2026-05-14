@@ -77,3 +77,10 @@ paper2ppt_audio/
 paper2ppt_figs/
 narration_cache.json
 api_storage/
+
+# ===============================
+# Evaluation Outputs
+# ===============================
+eval/*.json
+eval/*.pptx
+
